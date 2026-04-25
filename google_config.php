@@ -139,7 +139,10 @@ function handleGoogleCallback($code) {
                 } catch (\Exception $e) { /* ignore email failures */ }
             }
 
-            return ['success' => true, 'new_user' => true];
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
+            return ['success' => true, 'new_user' => true, 'redirect' => $frontend_url];
+
         }
     }
 

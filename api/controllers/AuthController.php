@@ -232,14 +232,16 @@ class AuthController {
         $result = handleGoogleCallback($code);
 
         if ($result['success']) {
-            $frontend_url = getenv('FRONTEND_URL') ?: 'https://campus-dive.vercel.app';
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
             $params = isset($result['new_user']) ? '?welcome=true' : '';
-            header("Location: " . $frontend_url . "/dashboard" . $params);
+            header("Location: " . rtrim($frontend_url, '/') . "/dashboard" . $params);
             exit;
         } else {
             // Redirect back to login with error
-            $frontend_url = getenv('FRONTEND_URL') ?: 'https://campus-dive.vercel.app';
-            header("Location: " . $frontend_url . "/login?error=" . urlencode($result['error']));
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
+            header("Location: " . rtrim($frontend_url, '/') . "/login?error=" . urlencode($result['error']));
             exit;
         }
     }
