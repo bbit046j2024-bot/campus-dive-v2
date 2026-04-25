@@ -58,26 +58,8 @@ set_exception_handler(function (Throwable $e) {
  * Campus Dive API — Front Controller / Router
  */
 
-// 2. CORS & Preflight
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$envOrigin = getenv('CORS_ORIGIN') ?: 'http://localhost:5173,https://campus-dive.vercel.app';
-$allowedOrigins = array_map('trim', explode(',', $envOrigin));
+// 2. [CORS & Preflight handled by root index.php]
 
-if (in_array($origin, $allowedOrigins) || str_ends_with($origin, '.vercel.app')) {
-    header("Access-Control-Allow-Origin: $origin");
-} elseif (empty($origin)) {
-    header("Access-Control-Allow-Origin: *");
-}
-
-
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, X-Requested-With');
-header('Access-Control-Allow-Credentials: true');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
 // Session Configuration (Required for cross-site Vercel <-> Railway)
 if (session_status() === PHP_SESSION_NONE) {
