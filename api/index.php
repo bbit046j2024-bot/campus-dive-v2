@@ -59,15 +59,16 @@ set_exception_handler(function (Throwable $e) {
  */
 
 // 2. CORS & Preflight
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $envOrigin = getenv('CORS_ORIGIN') ?: 'http://localhost:5173,https://campus-dive.vercel.app';
 $allowedOrigins = array_map('trim', explode(',', $envOrigin));
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (in_array($origin, $allowedOrigins)) {
+if (in_array($origin, $allowedOrigins) || str_ends_with($origin, '.vercel.app')) {
     header("Access-Control-Allow-Origin: $origin");
 } elseif (empty($origin)) {
     header("Access-Control-Allow-Origin: *");
 }
+
 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, X-Requested-With');
