@@ -45,7 +45,18 @@ try {
         @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS is_private TINYINT(1) DEFAULT 0 AFTER is_public");
         @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS manager_id INT DEFAULT NULL AFTER is_private");
         @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS status ENUM('active', 'archived', 'pending') DEFAULT 'active' AFTER manager_id");
-        echo "<p style='color:blue'>PATCH: Synchronized social_groups schema (added status column).</p>";
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS post_approval_required TINYINT(1) DEFAULT 0 AFTER status");
+        
+        // Handle posts -> group_posts migration
+        @$db->exec("RENAME TABLE posts TO group_posts");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS media_url VARCHAR(255) DEFAULT NULL AFTER content");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS media_type ENUM('image', 'video', 'link') DEFAULT 'image' AFTER media_url");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS status ENUM('pending', 'published', 'rejected') DEFAULT 'published' AFTER media_type");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS pinned TINYINT(1) DEFAULT 0 AFTER status");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0 AFTER pinned");
+        @$db->exec("ALTER TABLE group_posts ADD COLUMN IF NOT EXISTS comment_count INT DEFAULT 0 AFTER like_count");
+        
+        echo "<p style='color:blue'>PATCH: Synchronized group_posts and hub settings.</p>";
     } catch (Exception $e) {
         // Log error but continue
         echo "<p style='color:orange'>Notice: Database synchronization check complete.</p>";

@@ -261,6 +261,7 @@ CREATE TABLE IF NOT EXISTS social_groups (
     is_private TINYINT(1) DEFAULT 0,
     manager_id INT DEFAULT NULL,
     status ENUM('active', 'archived', 'pending') DEFAULT 'active',
+    post_approval_required TINYINT(1) DEFAULT 0,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
@@ -278,12 +279,17 @@ CREATE TABLE IF NOT EXISTS group_members (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS posts (
+CREATE TABLE IF NOT EXISTS group_posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     group_id INT DEFAULT NULL,
     content TEXT NOT NULL,
-    image_path VARCHAR(255) DEFAULT NULL,
+    media_url VARCHAR(255) DEFAULT NULL,
+    media_type ENUM('image', 'video', 'link') DEFAULT 'image',
+    status ENUM('pending', 'published', 'rejected') DEFAULT 'published',
+    pinned TINYINT(1) DEFAULT 0,
+    like_count INT DEFAULT 0,
+    comment_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
