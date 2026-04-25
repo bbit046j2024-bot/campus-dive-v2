@@ -252,12 +252,18 @@ CREATE TABLE IF NOT EXISTS interview_slots (
 CREATE TABLE IF NOT EXISTS social_groups (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL UNIQUE,
     description TEXT DEFAULT NULL,
+    category VARCHAR(50) DEFAULT 'General',
+    avatar_url VARCHAR(255) DEFAULT NULL,
     cover_image VARCHAR(255) DEFAULT NULL,
     is_public TINYINT(1) DEFAULT 1,
+    is_private TINYINT(1) DEFAULT 0,
+    manager_id INT DEFAULT NULL,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS group_members (

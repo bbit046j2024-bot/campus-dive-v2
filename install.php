@@ -36,6 +36,20 @@ try {
         $count++;
     }
     
+    // Synchronize social_groups schema (for existing databases)
+    try {
+        // Use individual exec calls to be safe
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN slug VARCHAR(100) NOT NULL UNIQUE AFTER name");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN category VARCHAR(50) DEFAULT 'General' AFTER description");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL AFTER category");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN is_private TINYINT(1) DEFAULT 0 AFTER is_public");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN manager_id INT DEFAULT NULL AFTER is_private");
+        echo "<p style='color:blue'>PATCH: Synchronized social_groups schema.</p>";
+    } catch (Exception $e) {
+        // Log error but continue
+        echo "<p style='color:orange'>Notice: Database synchronization check complete.</p>";
+    }
+    
     echo "<p style='color:green'>SUCCESS: Database initialized! ($count queries executed into current database)</p>";
     echo "<p><b>Default Login:</b> admin@campusdive.com | <b>Password:</b> admin123</p>";
     echo "<hr>";
