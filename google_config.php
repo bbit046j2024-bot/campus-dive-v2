@@ -112,16 +112,17 @@ function handleGoogleCallback($code) {
         if (class_exists('User')) {
             // Using API model
             $db = Database::getInstance();
-            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
+            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?, 1)");
             $stmt->execute([$firstname, $lastname, $email, $googleId, $randomPassword, $role, $role_id, $avatar, $status]);
             $userId = $db->lastInsertId();
         } else {
             // Fallback to mysqli
-            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, email, google_id, password, role, avatar, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
-            $stmt->bind_param("sssssss", $firstname, $lastname, $email, $googleId, $randomPassword, $role, $avatar);
+            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, password, role, avatar, status) VALUES (?, ?, ?, ?, '', ?, ?, ?, 'pending')");
+            $stmt->bind_param("ssssssss", $firstname, $lastname, $email, $googleId, $randomPassword, $role, $avatar);
             $stmt->execute();
             $userId = $stmt->insert_id;
         }
+
 
         if ($userId) {
             $_SESSION['user_id'] = $userId;
