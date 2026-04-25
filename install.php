@@ -38,8 +38,8 @@ try {
     
     // Synchronize users role ENUM (for manager support)
     try {
-        @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'admin', 'manager') DEFAULT 'student'");
-        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager support).</p>";
+        @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'student', 'admin', 'manager') DEFAULT 'student'");
+        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager support with compatibility).</p>";
     } catch (Exception $e) {
         // Ignore errors
     }

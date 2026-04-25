@@ -51,7 +51,7 @@ CREATE TABLE users (
     phone VARCHAR(20) NOT NULL,
     student_id VARCHAR(50) DEFAULT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('student', 'admin', 'manager') DEFAULT 'student',
+    role ENUM('user', 'student', 'admin', 'manager') DEFAULT 'student',
     role_id INT DEFAULT NULL,
     avatar VARCHAR(10) DEFAULT NULL,
     avatar_image VARCHAR(255) DEFAULT NULL,
