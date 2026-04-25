@@ -44,7 +44,10 @@ export default function GroupsPage() {
                     <h1 className="text-3xl font-black tracking-tight dark:text-white">Social Groups</h1>
                     <p className="text-sm text-slate-500 font-medium">Connect with fellow developers in your interest areas</p>
                 </div>
-                <button className="btn-primary rounded-full px-6 h-12 text-xs font-black uppercase tracking-widest shadow-glow shadow-primary-500/20">
+                <button 
+                    onClick={() => window.alert('Group creation protocol initiated. Contact Admin for deployment.')}
+                    className="btn-primary rounded-full px-6 h-12 text-xs font-black uppercase tracking-widest shadow-glow shadow-primary-500/20 active:scale-95 transition-transform"
+                >
                     <Plus className="w-5 h-5" />
                     <span>Create Group</span>
                 </button>

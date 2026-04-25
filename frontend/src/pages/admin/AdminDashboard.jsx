@@ -63,27 +63,26 @@ export default function AdminDashboard() {
 
     return (
         <div className="space-y-10 animate-fade-in pb-20">
-            <div className="flex items-center justify-between animate-stagger relative z-[100]" style={{ animationDelay: '0ms' }}>
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 animate-stagger relative z-[100]" style={{ animationDelay: '0ms' }}>
+                <div className="flex-1">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white leading-tight">
                         {header.title} <span className="text-indigo-600 font-display">{header.sub}</span>
                     </h1>
-                    <p className="text-surface-500 dark:text-surface-400 mt-2 font-medium">{header.desc}</p>
+                    <p className="text-surface-500 dark:text-surface-400 mt-1 sm:mt-2 font-medium text-sm sm:text-base">{header.desc}</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center">
                     <div className="relative">
                         <button
                             onClick={() => setShowNotifications(!showNotifications)}
-                            className={`w-14 h-14 rounded-3xl border flex items-center justify-center transition-all duration-300 relative shadow-soft ${showNotifications ? 'bg-indigo-600 text-white shadow-glow' : 'bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-800 text-surface-400 hover:border-indigo-200'}`}
+                            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl border flex items-center justify-center transition-all duration-300 relative shadow-soft ${showNotifications ? 'bg-indigo-600 text-white shadow-glow' : 'bg-white dark:bg-surface-900 border-surface-200 dark:border-surface-800 text-surface-400 hover:border-indigo-200'}`}
                         >
-                            <Bell className={`w-6 h-6 ${showNotifications ? '' : 'hover:animate-swing'}`} />
+                            <Bell className={`w-5 h-5 sm:w-6 sm:h-6 ${showNotifications ? '' : 'hover:animate-swing'}`} />
                             {data?.unread_notifications > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-surface-900 animate-bounce">
+                                <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-rose-500 text-white text-[9px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-surface-900 animate-bounce">
                                     {data.unread_notifications}
                                 </span>
                             )}
                         </button>
-
                         {showNotifications && (
                             <NotificationDropdown
                                 notifications={data?.notifications}
@@ -93,7 +92,7 @@ export default function AdminDashboard() {
                         )}
                     </div>
                     {!isInterviewer && (
-                        <Link to="/admin/students" className="btn-v2-primary shadow-lifted shadow-indigo-500/20">
+                        <Link to="/admin/students" className="btn-v2-primary !px-4 !py-3 sm:!px-6 sm:!py-4 shadow-lifted shadow-indigo-500/20 text-[10px] sm:text-xs">
                             <Users className="w-4 h-4" /> MANAGE POOL
                         </Link>
                     )}

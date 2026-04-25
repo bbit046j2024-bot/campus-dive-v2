@@ -148,14 +148,14 @@ export default function Sidebar() {
             {/* Mobile toggle */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="fixed top-6 left-6 z-40 lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-surface-900 shadow-glow-indigo border border-indigo-600/20 active:scale-95 transition-transform"
+                className="fixed top-6 left-6 z-[200] lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-surface-900 shadow-glow-indigo border border-indigo-600/20 active:scale-95 transition-transform"
             >
                 <Menu className="w-6 h-6 text-indigo-600" />
             </button>
 
             {/* Mobile overlay */}
             {mobileOpen && (
-                <div className="fixed inset-0 z-50 lg:hidden">
+                <div className="fixed inset-0 z-[300] lg:hidden">
                     <div className="absolute inset-0 bg-indigo-950/60 backdrop-blur-sm transition-all" onClick={() => setMobileOpen(false)} />
                     <div className="relative w-80 h-full bg-surface-50 dark:bg-surface-950 flex flex-col animate-slide-in-right shadow-2xl overflow-hidden">
                         <button onClick={() => setMobileOpen(false)} className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-xl bg-surface-100 dark:bg-white/10 text-surface-600 dark:text-surface-400 hover:bg-rose-500 hover:text-white transition-all z-10">
@@ -167,7 +167,7 @@ export default function Sidebar() {
             )}
 
             {/* Desktop sidebar */}
-            <aside className={`hidden lg:flex flex-col h-screen sticky top-0 border-r border-surface-200 dark:border-white/10 transition-all duration-500 ease-in-out z-40 ${collapsed ? 'w-24' : 'w-80'}`}>
+            <aside className={`hidden lg:flex flex-col h-screen sticky top-0 border-r border-surface-200 dark:border-white/10 transition-all duration-500 ease-in-out z-[200] ${collapsed ? 'w-24' : 'w-80'}`}>
                 {sidebarContent}
             </aside>
         </>

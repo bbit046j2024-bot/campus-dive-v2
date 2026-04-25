@@ -222,19 +222,20 @@ export default function SocialLayout() {
 
                     {/* CENTER COLUMN: FEED / CONTENT */}
                     <div className="space-y-6">
-                        <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+                        <div className="md:hidden flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 touch-pan-x">
                             {navItems.map(item => (
                                 <NavLink
                                     key={item.to}
                                     to={item.to}
                                     end={item.to === '/social'}
                                     className={({ isActive }) => `
-                                        flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap
+                                        flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-tight transition-all active:scale-95
                                         ${isActive 
-                                            ? 'bg-primary-500 text-white shadow-glow shadow-primary-500/20' 
-                                            : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
+                                            ? 'bg-primary-500 text-white shadow-glow-indigo' 
+                                            : 'bg-white dark:bg-surface-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/5'
                                         }
                                     `}
+                                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                 >
                                     <item.icon className="w-4 h-4" />
                                     <span>{item.label}</span>

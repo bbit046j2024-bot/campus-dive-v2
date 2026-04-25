@@ -113,7 +113,22 @@ export default function PostCard({ post }) {
                     <span className="text-[10px] font-black uppercase tracking-widest">{post.comments_count || post.comments || 0} Comments</span>
                 </Link>
 
-                <button className="action-btn flex-1">
+                <button 
+                    onClick={() => {
+                        if (navigator.share) {
+                            navigator.share({
+                                title: post.group_name || 'Campus Dive Post',
+                                text: post.content,
+                                url: window.location.href,
+                            });
+                        } else {
+                            navigator.clipboard.writeText(window.location.href);
+                            window.alert('Link copied to clipboard!');
+                        }
+                    }}
+                    className="action-btn flex-1 active:scale-95 transition-transform"
+                >
+                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} style={{ display: 'none' }} />
                     <Share2 className="w-5 h-5" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Share</span>
                 </button>
