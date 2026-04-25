@@ -1,0 +1,52 @@
+/* FIX: Specific Notification Styles to override conflicts */
+.dashboard-card .notification-list li {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+    padding: 15px 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.dashboard-card .notification-list li i {
+    font-size: 1.2rem !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--input-bg) !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+}
+
+.dashboard-card .notification-list li div {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.dashboard-card .notification-list li strong {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--text-main) !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+.dashboard-card .notification-list li p {
+    font-size: 0.85rem !important;
+    color: var(--text-muted) !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+.dashboard-card .notification-list li small {
+    font-size: 0.75rem !important;
+    color: var(--text-light) !important;
+    /* Force small text */
+    margin-top: 4px !important;
+    display: block !important;
+    font-weight: normal !important;
+}

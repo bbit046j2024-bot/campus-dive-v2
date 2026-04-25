@@ -1,0 +1,85 @@
+/* =========================================
+   USER DASHBOARD NOTIFICATIONS PATCH
+   ========================================= */
+
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.notification-list li:last-child {
+    border-bottom: none;
+}
+
+.notification-list li:hover {
+    background: var(--input-bg);
+}
+
+.notification-list li.unread {
+    background: rgba(30, 90, 168, 0.05);
+    /* Light primary bg */
+}
+
+/* Icon Styling */
+.notification-list li i {
+    font-size: 1.2em;
+    padding: 10px;
+    border-radius: 50%;
+    background: var(--bg-body);
+    color: var(--primary-color);
+    flex-shrink: 0;
+    /* Prevent icon shrinking */
+}
+
+.notification-list li.unread i {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Content Styling */
+.notification-list li div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notification-list li strong {
+    font-size: 0.95em;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.notification-list li p {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notification-list li small {
+    font-size: 0.75em;
+    color: var(--text-light);
+    /* Lighter gray for date */
+    margin-top: 5px;
+    display: block;
+}
+
+/* Empty State */
+.notification-list li.empty {
+    text-align: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 30px;
+}

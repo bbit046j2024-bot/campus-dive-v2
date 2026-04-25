@@ -1,0 +1,22 @@
+/* Main Stylesheet for The Campus Dive
+   Refactored into Modular Architecture */
+
+/* 1. Variables & Global Settings */
+@import 'css/variables.css';
+@import 'css/base.css';
+
+/* 2. Layout & Structure */
+@import 'css/layout.css';
+
+/* 3. Reusable Components */
+@import 'css/components.css';
+
+/* 4. Page-Specific Styles */
+@import 'css/auth.css';
+/* Login / Register */
+@import 'css/dashboard.css';
+/* User & Admin Dashboards */
+@import 'css/chat.css';
+/* Messaging Interface */
+
+/* 5. Legacy/Patch Styles (if any needed, add below) */
