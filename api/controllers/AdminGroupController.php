@@ -60,9 +60,20 @@ class AdminGroupController {
         $stmt->execute([$name, $slug, $description, $category, $input['avatar_url'] ?? null, $isPrivate, $user['id'], $managerId]);
         $groupId = $db->lastInsertId();
 
-        // If manager assigned, add them to group_members as manager
-        if ($managerId) {
-            $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) VALUES (?, ?, 'manager', 'active')")
+        // Auto-join the creator as a manager if no manager was explicitly assigned
+        // OR if the manager assigned is NOT the creator, still ensure creator is a member/manager
+        $finalManagerId = $managerId ?: $user['id'];
+        
+        $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) 
+                      VALUES (?, ?, 'manager', 'active') 
+                      ON DUPLICATE KEY UPDATE role = 'manager', status = 'active'")
+           ->execute([$groupId, $finalManagerId]);
+
+        // If a different manager was assigned, also make sure they are in the group
+        if ($managerId && $managerId != $user['id']) {
+            $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) 
+                          VALUES (?, ?, 'manager', 'active') 
+                          ON DUPLICATE KEY UPDATE role = 'manager', status = 'active'")
                ->execute([$groupId, $managerId]);
         }
 

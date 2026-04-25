@@ -99,21 +99,26 @@ class GroupPostController {
             Response::error('Content is required.');
         }
 
-        // Check if user is a member
+        // Check if user is a member OR an Admin
         $stmt = $db->prepare("SELECT role FROM group_members WHERE group_id = ? AND user_id = ? AND status = 'active'");
         $stmt->execute([$groupId, $user['id']]);
         $membership = $stmt->fetch();
 
-        if (!$membership) {
+        $isAdmin = in_array($user['role'], [ROLE_ADMIN, 'Admin']);
+
+        if (!$membership && !$isAdmin) {
             Response::forbidden('Only members can post.');
         }
+
+        // Admins are considered managers for approval purposes
+        $userRole = $membership['role'] ?? ($isAdmin ? 'manager' : 'member');
 
         // Check group settings for post approval
         $stmt = $db->prepare("SELECT post_approval_required FROM social_groups WHERE id = ?");
         $stmt->execute([$groupId]);
         $group = $stmt->fetch();
 
-        $status = ($group['post_approval_required'] && $membership['role'] === 'member') ? 'pending' : 'published';
+        $status = ($group['post_approval_required'] && $userRole === 'member') ? 'pending' : 'published';
 
         $mediaType = null;
         if ($mediaUrl) {
