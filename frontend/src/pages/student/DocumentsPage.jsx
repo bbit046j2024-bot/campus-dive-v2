@@ -73,16 +73,16 @@ export default function DocumentsPage() {
         <div className="space-y-10 pb-20 animate-fade-in">
             <div className="flex items-center justify-between mb-8 animate-stagger" style={{ animationDelay: '0ms' }}>
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white flex items-center gap-4 uppercase">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white flex items-center gap-3 sm:gap-4 uppercase">
                         Document <span className="text-indigo-600 font-display">Vault</span>
                     </h1>
-                    <p className="text-surface-500 dark:text-surface-400 mt-2 font-bold uppercase tracking-widest text-[10px] opacity-60">Secure repository for your professional military-grade assets</p>
+                    <p className="text-surface-500 dark:text-surface-400 mt-1 sm:mt-2 font-bold uppercase tracking-widest text-[9px] sm:text-[10px] opacity-60">Secure repository for your professional military-grade assets</p>
                 </div>
             </div>
 
             {/* Upload Zone */}
             <div
-                className={`card-premium p-12 border-2 border-dashed transition-all duration-500 cursor-pointer text-center group animate-stagger
+                className={`card-premium p-6 sm:p-12 border-2 border-dashed transition-all duration-500 cursor-pointer text-center group animate-stagger
                     ${dragActive ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10' : 'border-surface-200 dark:border-white/10 hover:border-indigo-400'}
                 `}
                 style={{ animationDelay: '200ms' }}
@@ -100,17 +100,17 @@ export default function DocumentsPage() {
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
                 
-                <div className="relative inline-block mb-6">
+                <div className="relative inline-block mb-4 sm:mb-6">
                     <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                    <div className={`w-20 h-20 rounded-3xl mx-auto flex items-center justify-center transition-all duration-500 ${dragActive ? 'bg-indigo-600 text-white scale-110 shadow-glow-indigo' : 'bg-surface-100 dark:bg-white/5 text-surface-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 group-hover:text-indigo-600'}`}>
-                        <CloudUpload className="w-10 h-10" />
+                    <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl mx-auto flex items-center justify-center transition-all duration-500 ${dragActive ? 'bg-indigo-600 text-white scale-110 shadow-glow-indigo' : 'bg-surface-100 dark:bg-white/5 text-surface-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 group-hover:text-indigo-600'}`}>
+                        <CloudUpload className="w-7 h-7 sm:w-10 sm:h-10" />
                     </div>
                 </div>
 
-                <h3 className="text-xl font-black text-indigo-950 dark:text-white uppercase tracking-tight mb-2">
+                <h3 className="text-lg sm:text-xl font-black text-indigo-950 dark:text-white uppercase tracking-tight mb-2">
                     {uploading ? 'Synchronizing Assets...' : 'Drop Intelligence Here'}
                 </h3>
-                <p className="text-[10px] font-black text-surface-400 uppercase tracking-[0.2em] mb-8">
+                <p className="text-[9px] sm:text-[10px] font-black text-surface-400 uppercase tracking-[0.2em] mb-6 sm:mb-8">
                     or click to browse local filesystem • <span className="text-indigo-600">PDF, DOC, JPG, PNG</span> • MAX 5MB
                 </p>
 
@@ -167,11 +167,11 @@ export default function DocumentsPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-3 mt-8 pt-4 border-t border-surface-100 dark:border-white/5">
-                                    <a href={`/uploads/${doc.filename}`} target="_blank" rel="noopener" className="flex-1 py-3 bg-surface-100 dark:bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-surface-600 dark:text-surface-400 hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2">
+                                <div className="flex gap-2 sm:gap-3 mt-6 sm:mt-8 pt-4 border-t border-surface-100 dark:border-white/5">
+                                    <a href={`/uploads/${doc.filename}`} target="_blank" rel="noopener" className="flex-1 py-2.5 sm:py-3 bg-surface-100 dark:bg-white/5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-surface-600 dark:text-surface-400 hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2">
                                         <Eye className="w-3 h-3" /> VERIFY
                                     </a>
-                                    <button onClick={() => setDeleteId(doc.id)} className="flex-1 py-3 bg-surface-100 dark:bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center gap-2">
+                                    <button onClick={() => setDeleteId(doc.id)} className="flex-1 py-2.5 sm:py-3 bg-surface-100 dark:bg-white/5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center gap-2">
                                         <Trash2 className="w-3 h-3" /> PURGE
                                     </button>
                                 </div>

@@ -21,8 +21,8 @@ function ProgressTracker({ status }) {
 
     return (
         <div className="card-premium p-8 lg:p-10">
-            <h3 className="font-display font-black text-xl mb-10 text-surface-900 dark:text-white flex items-center gap-3">
-                <div className="w-2 h-8 bg-indigo-600 rounded-full" />
+            <h3 className="font-display font-black text-lg sm:text-xl mb-6 sm:mb-10 text-surface-900 dark:text-white flex items-center gap-2 sm:gap-3">
+                <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-indigo-600 rounded-full" />
                 Application Pipeline
             </h3>
             {rejected ? (
@@ -44,22 +44,22 @@ function ProgressTracker({ status }) {
                         const done = i <= currentIdx;
                         const active = i === currentIdx;
                         return (
-                            <div key={step.key} className="relative z-10 flex flex-col items-center min-w-[80px]">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 
+                            <div key={step.key} className="relative z-10 flex flex-col items-center min-w-[65px] sm:min-w-[80px]">
+                                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 
                                     ${done ? 'bg-indigo-600 text-white shadow-lifted shadow-indigo-500/30' : 'bg-white dark:bg-surface-900 text-surface-300 border border-surface-100 dark:border-white/5'}
                                     ${active ? 'ring-4 ring-indigo-500/20 scale-110' : ''}
                                 `}>
-                                    <step.icon className={`w-6 h-6 ${active ? 'animate-pulse' : ''}`} />
+                                    <step.icon className={`w-4 h-4 sm:w-6 sm:h-6 ${active ? 'animate-pulse' : ''}`} />
                                 </div>
-                                <div className="mt-4 text-center">
-                                    <span className={`text-[10px] font-black uppercase tracking-tighter transition-colors duration-300 ${done ? 'text-indigo-600 dark:text-indigo-400' : 'text-surface-400'}`}>
+                                <div className="mt-3 sm:mt-4 text-center">
+                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-tighter transition-colors duration-300 ${done ? 'text-indigo-600 dark:text-indigo-400' : 'text-surface-400'}`}>
                                         {step.label}
                                     </span>
                                 </div>
                                 
                                 {/* Connecting Line Highlight */}
                                 {i < currentIdx && (
-                                    <div className="absolute top-7 left-[3.5rem] w-[calc(100%+1rem)] h-1 bg-indigo-600 rounded-full z-0" />
+                                    <div className="absolute top-5 sm:top-7 left-[2.5rem] sm:left-[3.5rem] w-[calc(100%+0.5rem)] sm:w-[calc(100%+1rem)] h-1 bg-indigo-600 rounded-full z-0" />
                                 )}
                             </div>
                         );
@@ -96,19 +96,19 @@ export default function StudentDashboard() {
     return (
         <div className="space-y-10 animate-fade-in pb-20">
             {/* Welcome Header */}
-            <div className="flex items-center justify-between animate-stagger relative z-[100]" style={{ animationDelay: '0ms' }}>
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 animate-stagger relative z-[100]" style={{ animationDelay: '0ms' }}>
+                <div className="flex-1">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white leading-tight">
                         Welcome back, <span className="text-indigo-600 font-display">{user?.firstname}!</span> 👋
                     </h1>
-                    <p className="text-surface-500 dark:text-surface-400 mt-2 font-medium">Here's a curated look at your recruitment progress</p>
+                    <p className="text-surface-500 dark:text-surface-400 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Here's a curated look at your recruitment progress</p>
                 </div>
-                <div className="relative z-50">
+                <div className="relative z-50 self-end sm:self-center">
                     <button 
                         onClick={() => setShowNotifications(true)}
-                        className="w-14 h-14 rounded-3xl bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800 flex items-center justify-center text-surface-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-glow transition-all relative shadow-soft"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-800 flex items-center justify-center text-surface-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-glow transition-all relative shadow-soft"
                     >
-                        <Bell className="w-6 h-6" />
+                        <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
                         {data?.unread_notifications > 0 && (
                             <span className="absolute top-4 right-4 w-3 h-3 bg-red-500 border-2 border-white dark:border-surface-900 rounded-full" />
                         )}
