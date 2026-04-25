@@ -1,2 +1,2 @@
-[phases.build]
-cmds = ["composer install --no-dev --optimize-autoloader"]
+[variables]
+    PHP_EXTENSIONS = "mysqli, pdo_mysql, mbstring, gd, curl, openssl"
