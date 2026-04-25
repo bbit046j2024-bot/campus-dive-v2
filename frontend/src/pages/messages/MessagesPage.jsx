@@ -288,7 +288,7 @@ export default function MessagesPage() {
                                                     )}
                                                     <div className={`flex items-center gap-1 mt-1 ${isMine ? 'justify-end' : ''}`}>
                                                         <span className={`text-xs ${isMine ? 'text-white/70' : 'text-surface-400'}`}>
-                                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {new Date(msg.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                         {isMine && msg.is_read && <CheckCheck className="w-3 h-3 text-white/70" />}
                                                     </div>

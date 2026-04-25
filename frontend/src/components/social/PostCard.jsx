@@ -25,7 +25,7 @@ export default function PostCard({ post }) {
 
     const authorName = post.author || `${post.firstname} ${post.lastname}`;
     const initials = post.initials || (post.firstname && post.lastname ? `${post.firstname[0]}${post.lastname[0]}` : (post.firstname ? post.firstname[0] : '??'));
-    const timeStr = post.time || (post.created_at ? new Date(post.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently');
+    const timeStr = post.time || (post.created_at ? new Date(post.created_at.replace(' ', 'T') + 'Z').toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently');
     const groupName = post.group_name || post.group || 'General';
 
     return (

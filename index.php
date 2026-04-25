@@ -4,6 +4,9 @@
  * Handles both the Backend UI and the API Routing
  */
 
+// 0. Set Timezone for consistency
+date_default_timezone_set('UTC');
+
 // 1. Load CORS & Security Headers
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 // Allow localhost and any .vercel.app domain
