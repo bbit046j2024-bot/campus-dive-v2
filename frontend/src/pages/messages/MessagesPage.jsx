@@ -156,10 +156,10 @@ export default function MessagesPage() {
         <div className="animate-fade-in">
             <h1 className="text-2xl font-bold mb-6">Messages</h1>
 
-            <div className="card overflow-hidden" style={{ height: 'calc(100vh - 160px)' }}>
+            <div className="card overflow-hidden h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)]">
                 <div className="flex h-full">
                     {/* Conversation List */}
-                    <div className={`w-full sm:w-80 border-r border-surface-100 dark:border-surface-800 flex flex-col ${activeThread ? 'hidden sm:flex' : 'flex'}`}>
+                    <div className={`w-full md:w-80 border-r border-surface-100 dark:border-surface-800 flex flex-col ${activeThread ? 'hidden md:flex' : 'flex'}`}>
                         <div className="p-4 border-b border-surface-100 dark:border-surface-800 space-y-3">
                             <div className="flex items-center justify-between gap-2">
                                 <div className="relative flex-1">
@@ -223,13 +223,13 @@ export default function MessagesPage() {
                     </div>
 
                     {/* Chat Thread */}
-                    <div className={`flex-1 flex flex-col ${activeThread ? 'flex' : 'hidden sm:flex'}`}>
+                    <div className={`flex-1 flex flex-col w-full ${activeThread ? 'flex' : 'hidden md:flex'}`}>
                         {activeThread && otherUser ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="flex items-center gap-3 p-4 border-b border-surface-100 dark:border-surface-800">
-                                    <button onClick={() => { setActiveThread(null); setConfirmDelete(false); }} className="sm:hidden btn-icon w-8 h-8 flex items-center justify-center">
-                                        <ArrowLeft className="w-4 h-4" />
+                                <div className="flex items-center gap-2 p-3 sm:p-4 border-b border-surface-100 dark:border-surface-800 bg-white/50 dark:bg-surface-900/50 backdrop-blur-md">
+                                    <button onClick={() => { setActiveThread(null); setConfirmDelete(false); }} className="md:hidden btn-icon w-9 h-9 flex items-center justify-center">
+                                        <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <UserAvatar user={otherUser} size="sm" />
                                     <div className="flex-1">
@@ -276,9 +276,9 @@ export default function MessagesPage() {
                                         const isMine = msg.sender_id == user.id;
                                         return (
                                             <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${isMine
+                                                <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 ${isMine
                                                     ? 'bg-primary-600 text-white rounded-br-md'
-                                                    : 'bg-surface-100 dark:bg-surface-800 rounded-bl-md'
+                                                    : 'bg-surface-100 dark:bg-surface-800 rounded-bl-md shadow-sm'
                                                     }`}>
                                                     <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                                                     {msg.attachment_path && (
@@ -300,7 +300,7 @@ export default function MessagesPage() {
                                 </div>
 
                                 {/* Message Input */}
-                                <div className="p-4 border-t border-surface-100 dark:border-surface-800">
+                                <div className="p-3 sm:p-4 border-t border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900">
                                     {attachment && (
                                         <div className="flex items-center gap-2 mb-3 p-2 rounded-xl bg-surface-50 dark:bg-white/5 border border-white/10 animate-fade-in">
                                             <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500">
@@ -315,7 +315,7 @@ export default function MessagesPage() {
                                             </button>
                                         </div>
                                     )}
-                                    <form onSubmit={sendMessage} className="flex items-center gap-3">
+                                    <form onSubmit={sendMessage} className="flex items-center gap-2 sm:gap-3">
                                         <input
                                             type="file"
                                             ref={fileInputRef}
@@ -325,7 +325,7 @@ export default function MessagesPage() {
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className={`btn-icon w-12 h-12 ${attachment ? 'text-primary-500 bg-primary-500/10' : ''}`}
+                                            className={`btn-icon w-10 h-10 sm:w-12 sm:h-12 shrink-0 ${attachment ? 'text-primary-500 bg-primary-500/10' : ''}`}
                                             disabled={sending}
                                         >
                                             <Paperclip className="w-5 h-5" />
@@ -334,11 +334,11 @@ export default function MessagesPage() {
                                             type="text"
                                             value={newMessage}
                                             onChange={e => setNewMessage(e.target.value)}
-                                            className="input-field flex-1"
+                                            className="input-field flex-1 text-sm py-2.5 h-auto sm:h-12"
                                             placeholder="Type a message..."
                                             disabled={sending}
                                         />
-                                        <button type="submit" disabled={sending || (!newMessage.trim() && !attachment)} className="btn-primary px-4 py-3">
+                                        <button type="submit" disabled={sending || (!newMessage.trim() && !attachment)} className="btn-primary p-3 sm:px-4 sm:py-3 shrink-0">
                                             <Send className="w-4 h-4" />
                                         </button>
                                     </form>
