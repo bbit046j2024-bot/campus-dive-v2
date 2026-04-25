@@ -181,7 +181,7 @@ export default function LoginPage() {
 
                         <div className="relative py-8 flex items-center gap-4">
                             <div className="flex-1 h-px bg-surface-200 dark:bg-white/5" />
-                            <span className="text-[10px] font-black text-surface-400 uppercase tracking-[0.2em]">External ID</span>
+                            <span className="text-[10px] font-black text-surface-400 uppercase tracking-[0.2em]">Or Continue With</span>
                             <div className="flex-1 h-px bg-surface-200 dark:bg-white/5" />
                         </div>
 
@@ -195,10 +195,10 @@ export default function LoginPage() {
                                     toast.error('Google ID Failure');
                                 }
                             }}
-                            className="w-full py-4 px-6 rounded-2xl bg-white dark:bg-white/5 border border-surface-200 dark:border-white/5 hover:border-indigo-600 transition-all flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-surface-600 dark:text-surface-300 shadow-sm"
+                            className="w-full py-4 px-6 rounded-2xl bg-white dark:bg-white/5 border border-surface-200 dark:border-indigo-500/30 hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-500/10 transition-all flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-surface-700 dark:text-surface-200 shadow-sm"
                         >
-                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4 grayscale opacity-70 group-hover:grayscale-0 transition-all" />
-                            CONTINUE WITH GOOGLE
+                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+                            Sign in with Google
                         </button>
                     </form>
 
