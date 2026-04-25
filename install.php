@@ -36,10 +36,10 @@ try {
         $count++;
     }
     
-    // Synchronize users role ENUM (for manager support)
+    // Synchronize users role ENUM (for manager/interviewer support)
     try {
-        @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'student', 'admin', 'manager') DEFAULT 'student'");
-        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager support with compatibility).</p>";
+        @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'student', 'admin', 'manager', 'interviewer') DEFAULT 'student'");
+        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager/interviewer support).</p>";
     } catch (Exception $e) {
         // Ignore errors
     }
