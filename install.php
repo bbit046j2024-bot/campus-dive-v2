@@ -1,6 +1,6 @@
 <?php
 /**
- * Campus Dive - Robust Database Installer
+ * Campus Dive - Robust Database Installer (Aiven Optimized)
  */
 require_once __DIR__ . '/api/config/database.php';
 
@@ -15,12 +15,8 @@ try {
     }
 
     $sql = file_get_contents($sqlFile);
-
-    // PDO::exec doesn't handle multiple queries. We must split them.
-    // However, splitting by ; is dangerous with triggers/functions.
-    // For this script, we'll use a simple split or better: use the PDO connection to run them.
     
-    // Clean up SQL (remove comments)
+    // Clean up SQL
     $sql = preg_replace('/--.*?\n/', '', $sql);
     $sql = preg_replace('/\/\*.*?\*\//', '', $sql);
     
@@ -29,13 +25,18 @@ try {
 
     $count = 0;
     foreach ($queries as $query) {
-        if (!empty($query)) {
-            $db->exec($query);
-            $count++;
+        if (empty($query)) continue;
+        
+        // SKIP "CREATE DATABASE" and "USE" for Aiven/Railway compatibility
+        if (stripos($query, 'CREATE DATABASE') !== false || stripos($query, 'USE ') === 0) {
+            continue;
         }
+        
+        $db->exec($query);
+        $count++;
     }
     
-    echo "<p style='color:green'>SUCCESS: Database initialized! ($count queries executed)</p>";
+    echo "<p style='color:green'>SUCCESS: Database initialized! ($count queries executed into current database)</p>";
     echo "<p><b>Default Login:</b> admin@campusdive.com | <b>Password:</b> admin123</p>";
     echo "<hr>";
     echo "<p><a href='/'>Go to API Mainframe</a></p>";
