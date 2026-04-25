@@ -2,6 +2,8 @@
     "require": {
         "phpmailer/phpmailer": "^7.0",
         "cboden/ratchet": "^0.4.4",
-        "google/apiclient": "^2.15"
+        "google/apiclient": "^2.15",
+        "ext-mysqli": "*",
+        "ext-pdo_mysql": "*"
     }
 }
