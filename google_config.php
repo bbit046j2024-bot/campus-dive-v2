@@ -132,17 +132,14 @@ function handleGoogleCallback($code) {
             $_SESSION['role'] = $role;
             $_SESSION['role_id'] = $role_id;
 
-            // Notifications/Emails
-            if (class_exists('EmailService')) {
+            // Create notification instead (much faster than email)
+            if (class_exists('Notification')) {
                 try {
-                    EmailService::sendNotification($email, "Welcome to Campus Dive", "Your account has been created via Google Sign-in.");
-                } catch (\Exception $e) { /* ignore email failures */ }
+                    Notification::create($userId, 'Welcome!', 'Your account has been created successfully via Google.', 'success');
+                } catch (\Exception $e) { /* ignore */ }
             }
 
-            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
-            return ['success' => true, 'new_user' => true, 'redirect' => $frontend_url];
-
+            return ['success' => true, 'new_user' => true];
         }
     }
 
