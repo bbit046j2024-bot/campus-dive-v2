@@ -1,8 +1,46 @@
 <?php
 /**
- * Campus Dive Backend Entry Point
- * This file handles the root of the backend deployment.
+ * Campus Dive - Smart Router for Railway
+ * Handles both the Backend UI and the API Routing
  */
+
+// 1. Load CORS & Security Headers
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+// Allow localhost and any .vercel.app domain
+if (str_ends_with($origin, '.vercel.app') || str_contains($origin, 'localhost')) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    header('Access-Control-Allow-Origin: ' . (getenv('FRONTEND_URL') ?: '*'));
+}
+
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
+
+// Handle Preflight
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// 2. Route the Request
+$requestUri = $_SERVER['REQUEST_URI'];
+$path = parse_url($requestUri, PHP_URL_PATH);
+
+// If it's an API call or a legacy file, hand it off to the API logic
+if (str_starts_with($path, '/api') || $path === '/install.php') {
+    // If it's exactly /install.php, we let the file exist
+    if (file_exists(__DIR__ . $path) && is_file(__DIR__ . $path)) {
+        require_once __DIR__ . $path;
+        exit;
+    }
+    
+    // Otherwise, everything else goes to the API controller
+    require_once __DIR__ . '/api/index.php';
+    exit;
+}
+
+// 3. Otherwise, show the Backend Dashboard UI
 ?>
 <!DOCTYPE html>
 <html lang="en">
