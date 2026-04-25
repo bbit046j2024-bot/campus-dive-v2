@@ -260,6 +260,7 @@ CREATE TABLE IF NOT EXISTS social_groups (
     is_public TINYINT(1) DEFAULT 1,
     is_private TINYINT(1) DEFAULT 0,
     manager_id INT DEFAULT NULL,
+    status ENUM('active', 'archived', 'pending') DEFAULT 'active',
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,

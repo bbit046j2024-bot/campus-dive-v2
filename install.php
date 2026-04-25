@@ -42,9 +42,10 @@ try {
         @$db->exec("ALTER TABLE social_groups ADD COLUMN slug VARCHAR(100) NOT NULL UNIQUE AFTER name");
         @$db->exec("ALTER TABLE social_groups ADD COLUMN category VARCHAR(50) DEFAULT 'General' AFTER description");
         @$db->exec("ALTER TABLE social_groups ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL AFTER category");
-        @$db->exec("ALTER TABLE social_groups ADD COLUMN is_private TINYINT(1) DEFAULT 0 AFTER is_public");
-        @$db->exec("ALTER TABLE social_groups ADD COLUMN manager_id INT DEFAULT NULL AFTER is_private");
-        echo "<p style='color:blue'>PATCH: Synchronized social_groups schema.</p>";
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS is_private TINYINT(1) DEFAULT 0 AFTER is_public");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS manager_id INT DEFAULT NULL AFTER is_private");
+        @$db->exec("ALTER TABLE social_groups ADD COLUMN IF NOT EXISTS status ENUM('active', 'archived', 'pending') DEFAULT 'active' AFTER manager_id");
+        echo "<p style='color:blue'>PATCH: Synchronized social_groups schema (added status column).</p>";
     } catch (Exception $e) {
         // Log error but continue
         echo "<p style='color:orange'>Notice: Database synchronization check complete.</p>";
