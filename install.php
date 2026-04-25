@@ -36,6 +36,14 @@ try {
         $count++;
     }
     
+    // Synchronize users role ENUM (for manager support)
+    try {
+        @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'admin', 'manager') DEFAULT 'student'");
+        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager support).</p>";
+    } catch (Exception $e) {
+        // Ignore errors
+    }
+
     // Synchronize social_groups schema (for existing databases)
     try {
         // Use individual exec calls to be safe
