@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Email Service (PHPMailer wrapper)
  */
@@ -75,7 +75,6 @@ class EmailService {
              return false;
         }
 
-        // If it looks like a Resend key, use Resend API
         if (str_starts_with($apiKey, 're_')) {
             $apiUrl = 'https://api.resend.com/emails';
             $data = [
@@ -84,7 +83,6 @@ class EmailService {
                 'subject' => $subject,
                 'html'    => $htmlBody,
             ];
-
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $apiUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -94,17 +92,12 @@ class EmailService {
                 'Authorization: Bearer ' . $apiKey,
                 'Content-Type: application/json'
             ]);
-
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $error = curl_error($ch);
             curl_close($ch);
-
             if ($httpCode >= 200 && $httpCode < 300) return true;
-            
-            self::logError("Resend API Failed", ['to' => $to, 'http_code' => $httpCode, 'response' => $response]);
-        } 
-        else {
+            self::logError("Resend API Failed", ['to' => $to, 'http_code' => $httpCode]);
+        } else {
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
@@ -132,25 +125,20 @@ class EmailService {
 
     public static function sendVerification(string $to, string $firstname, string $token): bool {
         $baseUrl = rtrim(getenv('APP_URL') ?: 'http://localhost/Campus-Dive/Campus-Dive-main', '/');
-        // Support for Vercel/Production detection
         if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'railway.app')) {
             $baseUrl = 'https://' . $_SERVER['HTTP_HOST'];
         }
-        
         $link = $baseUrl . '/api/auth/verify-email?token=' . $token;
         $content = "<p>Welcome to the mainframe, <strong>{$firstname}</strong>.</p><p>Establish your clearance level by synchronizing your email address with our security protocols.</p>";
         $html = self::getBaseTemplate('Security Sync Required', $content, 'ESTABLISH CLEARANCE', $link);
-        
         return self::send($to, 'Security Sync: Verify Your Identity', $html);
     }
 
     public static function sendPasswordReset(string $to, string $firstname, string $token): bool {
         $frontendUrl = rtrim(getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app', '/');
         $link = $frontendUrl . '/#/reset-password?token=' . $token;
-        
         $content = "<p>A password reset protocol was initiated for your profile. If you did not authorize this, please contact security immediately.</p>";
         $html = self::getBaseTemplate('Protocol: Password Reset', $content, 'REINITIALIZE ACCESS', $link);
-        
         return self::send($to, 'Protocol Sync: Reset Password', $html);
     }
 
@@ -160,8 +148,12 @@ class EmailService {
         return self::send($to, 'System Diagnostic: SMTP Uplink Success', $html);
     }
 
+    public static function sendNotification(string $to, string $subject, string $message): bool {
+        $html = self::getBaseTemplate($subject, "<p>{$message}</p>");
+        return self::send($to, $subject, $html);
+    }
+
     private static function logError(string $context, array $details): void {
         error_log("$context: " . json_encode($details));
     }
 }
-",Description:

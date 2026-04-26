@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Admin Controller
  */
@@ -11,10 +11,8 @@ class AdminController {
 
         $db = Database::getInstance();
         
-        // 1. Get stats and unread counts in parallel where possible
         $stats = User::getStats();
         
-        // Combine unread counts into one query
         $countsStmt = $db->prepare("
             SELECT 
                 (SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0) as unread_messages,
@@ -23,7 +21,6 @@ class AdminController {
         $countsStmt->execute([$user['id'], $user['id']]);
         $counts = $countsStmt->fetch();
 
-        // 2. Recent applications (last 10) - Use prepared statement
         $recentStmt = $db->prepare("
             SELECT id, firstname, lastname, email, status, created_at 
             FROM users 
@@ -34,7 +31,6 @@ class AdminController {
         $recentStmt->execute([ROLE_ADMIN]);
         $recent = $recentStmt->fetchAll();
 
-        // 3. Monthly application trends (last 6 months) - Use prepared statement
         $trendsStmt = $db->prepare("
             SELECT 
                 DATE_FORMAT(created_at, '%Y-%m') as month,
@@ -76,7 +72,6 @@ class AdminController {
 
         $result = User::getAllStudents($filters);
 
-        // Strip passwords
         foreach ($result['data'] as &$s) {
             unset($s['password'], $s['verification_token'], $s['reset_token'], $s['reset_token_expires']);
         }
@@ -123,13 +118,10 @@ class AdminController {
         if (!$student) Response::notFound('Student not found.');
 
         User::update($id, ['status' => $input['status']]);
-
-        // Log stage transition
         ApplicationStage::create($id, $input['status']);
 
-        // Notify student
         $statusLabels = [
-            STATUS_APPROVED => 'Your application has been approved! 🎉',
+            STATUS_APPROVED => 'Your application has been approved!',
             STATUS_REJECTED => 'Your application status has been updated.',
             STATUS_UNDER_REVIEW => 'Your application is now under review.',
             STATUS_INTERVIEW_SCHEDULED => 'An interview has been scheduled for you.',
@@ -165,7 +157,7 @@ class AdminController {
             switch ($input['action']) {
                 case 'approve':
                     User::update($id, ['status' => STATUS_APPROVED]);
-                    Notification::create($id, 'Application Approved', 'Your application has been approved! 🎉', 'success');
+                    Notification::create($id, 'Application Approved', 'Your application has been approved!', 'success');
                     $count++;
                     break;
                 case 'reject':
@@ -219,7 +211,8 @@ class AdminController {
             Response::error('Failed to update role permissions.', 500);
         }
     }
-    /** GET /api/admin/users - Search all users for assignment */
+
+    /** GET /api/admin/users - Search all users */
     public static function users(): void {
         $user = AuthMiddleware::handle();
         RoleMiddleware::require([ROLE_ADMIN, 'Admin'], $user);
@@ -245,7 +238,6 @@ class AdminController {
 
     /** PUT /api/admin/users/:id/role */
     public static function updateUserRole(int $id): void {
-        
         $user = AuthMiddleware::handle();
         RoleMiddleware::require([ROLE_ADMIN, 'Admin'], $user);
         CsrfMiddleware::validate();
@@ -259,7 +251,6 @@ class AdminController {
         $targetUser = User::findById($id);
         if (!$targetUser) Response::notFound('User not found.');
 
-        // Update role_id and the legacy role string
         $roleId = intval($input['role_id']);
         $roleName = 'user';
         if ($roleId === ROLE_ADMIN) $roleName = 'admin';
@@ -295,7 +286,7 @@ class AdminController {
         $v = Validator::make($input)
             ->required('subject')
             ->required('message')
-            ->required('target'); // 'all', 'students', or array of user_ids
+            ->required('target');
 
         if ($v->fails()) Response::validationError($v->errors());
 
