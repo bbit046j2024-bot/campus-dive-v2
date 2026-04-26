@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import { 
@@ -63,7 +63,6 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
                     <div key={i} className="card-premium p-8 flex items-center gap-5 animate-stagger" style={{ animationDelay: `${(i + 1) * 100}ms` }}>
@@ -79,7 +78,6 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Engagement Chart */}
                 <div className="lg:col-span-2 card-premium p-8 lg:p-10 animate-stagger" style={{ animationDelay: '500ms' }}>
                     <div className="flex items-center justify-between mb-12">
                         <h3 className="font-display font-black text-xl text-surface-900 dark:text-white flex items-center gap-3">
@@ -115,7 +113,6 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-                {/* System Diagnostics */}
                 <div className="space-y-8 animate-stagger" style={{ animationDelay: '600ms' }}>
                     <div className="card-premium p-8 lg:p-10 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -154,4 +151,3 @@ export default function AnalyticsPage() {
         </div>
     );
 }
-",Description:
