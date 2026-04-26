@@ -36,13 +36,14 @@ export default function StudentsPage() {
         }
     }, [search, statusFilter]);
 
-    useEffect(() => { fetchStudents(); }, [fetchStudents]);
+    useEffect(() => { 
+        fetchStudents(1); 
+    }, []); 
 
-    // Debounced search
     useEffect(() => {
-        const timer = setTimeout(() => fetchStudents(), 300);
+        const timer = setTimeout(() => fetchStudents(1), 300);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [search, statusFilter, fetchStudents]);
 
     const updateStatus = async (id, status) => {
         try {
