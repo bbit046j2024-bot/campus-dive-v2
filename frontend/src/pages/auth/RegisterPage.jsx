@@ -327,10 +327,18 @@ export default function RegisterPage() {
                                         {loading ? (
                                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                         ) : (
-                                            <>INITIALIZE PROFILE <ArrowRight className="w-4 h-4" /></>
+                                            <>
+                                                {form.selectedGroups.length > 0 ? 'JOIN & INITIALIZE' : 'FINALIZE PROFILE'}
+                                                <ArrowRight className="w-4 h-4" />
+                                            </>
                                         )}
                                     </button>
                                 </div>
+                                {form.selectedGroups.length === 0 && (
+                                    <p className="text-center text-[9px] font-black text-surface-400 uppercase tracking-widest mt-4">
+                                        You can join communities anytime from your dashboard.
+                                    </p>
+                                )}
                             </div>
                         )}
 
