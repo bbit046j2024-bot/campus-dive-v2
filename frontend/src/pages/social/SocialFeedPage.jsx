@@ -42,11 +42,16 @@ export default function SocialFeedPage() {
                 socialApi.getGroups()
             ]);
             setPosts(postsRes.data || []);
-            // Only show groups where user is a member
-            setMyGroups((groupsRes.data || []).filter(g => g.user_role));
-            if (!selectedGroup && groupsRes.data?.length > 0) {
-                const joined = groupsRes.data.find(g => g.user_role);
-                if (joined) setSelectedGroup(joined);
+            const isAdmin = user?.role === 'admin' || user?.role === 'Admin';
+            const allGroups = groupsRes.data || [];
+            
+            // Admins see all groups, students only see joined groups
+            const visibleGroups = isAdmin ? allGroups : allGroups.filter(g => g.user_role);
+            
+            setMyGroups(visibleGroups);
+            
+            if (!selectedGroup && visibleGroups.length > 0) {
+                setSelectedGroup(visibleGroups[0]);
             }
         } catch (err) {
             console.error('Failed to fetch data:', err);
