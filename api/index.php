@@ -4,7 +4,7 @@
  * All API requests funnel through here.
  */
 
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/app.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/middleware/AuthMiddleware.php';
 require_once __DIR__ . '/middleware/RoleMiddleware.php';
@@ -76,7 +76,7 @@ $routes = [
     'POST /admin/students/bulk-action' => ['AdminController', 'bulkAction'],
     'GET /admin/roles'          => ['AdminController', 'roles'],
     'GET /admin/users'          => ['AdminController', 'users'],
-    'GET /admin/analytics'      => ['AdminController', 'dashboard'], // Shared for now
+    'GET /admin/analytics'      => ['AdminController', 'dashboard'],
     
     // Administrative System & Broadcast
     'POST /admin/system/test-email' => ['AdminController', 'testEmail'],
