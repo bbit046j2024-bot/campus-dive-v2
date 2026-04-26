@@ -58,6 +58,7 @@ class AuthController {
             ->required('phone')
             ->phone('phone')
             ->required('student_id', 'Student ID')
+            ->required('department')
             ->required('password')
             ->minLength('password', 6)
             ->required('confirm_password')
@@ -84,6 +85,7 @@ class AuthController {
                 'email'              => $v->sanitized('email'),
                 'phone'              => $v->sanitized('phone'),
                 'student_id'         => $v->sanitized('student_id'),
+                'department'         => $v->sanitized('department'),
                 'password'           => $input['password'],
                 'verification_token' => $token,
             ]);

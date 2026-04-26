@@ -53,7 +53,8 @@ try {
     // Synchronize users role ENUM (for manager/interviewer support)
     try {
         @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'student', 'admin', 'manager', 'interviewer') DEFAULT 'student'");
-        echo "<p style='color:blue'>PATCH: Synchronized user roles (added manager/interviewer support).</p>";
+        @$db->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS department VARCHAR(100) DEFAULT NULL AFTER student_id");
+        echo "<p style='color:blue'>PATCH: Synchronized user roles and added department support.</p>";
     } catch (Exception $e) {
         // Ignore errors
     }

@@ -21,8 +21,8 @@ class User {
 
     public static function create(array $data): int|false {
         $stmt = self::db()->prepare('
-            INSERT INTO users (firstname, lastname, email, phone, student_id, password, role, role_id, avatar, status, verification_token, email_verified) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (firstname, lastname, email, phone, student_id, department, password, role, role_id, avatar, status, verification_token, email_verified) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ');
         $avatar = strtoupper(substr($data['firstname'], 0, 1) . substr($data['lastname'], 0, 1));
         $stmt->execute([
@@ -31,6 +31,7 @@ class User {
             $data['email'],
             $data['phone'] ?? '',
             $data['student_id'] ?? null,
+            $data['department'] ?? null,
             password_hash($data['password'], PASSWORD_DEFAULT),
             'user',
             ROLE_STUDENT,
