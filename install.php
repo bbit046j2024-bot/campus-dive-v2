@@ -36,6 +36,15 @@ try {
         $count++;
     }
     
+    // Synchronize group_members (for status/manager support)
+    try {
+        @$db->exec("ALTER TABLE group_members MODIFY COLUMN role ENUM('member', 'moderator', 'manager', 'admin') DEFAULT 'member'");
+        @$db->exec("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS status ENUM('active', 'pending', 'blocked') DEFAULT 'active' AFTER role");
+        echo "<p style='color:blue'>PATCH: Synchronized group_members (added status/manager support).</p>";
+    } catch (Exception $e) {
+        // Ignore errors
+    }
+
     // Synchronize users role ENUM (for manager/interviewer support)
     try {
         @$db->exec("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'student', 'admin', 'manager', 'interviewer') DEFAULT 'student'");

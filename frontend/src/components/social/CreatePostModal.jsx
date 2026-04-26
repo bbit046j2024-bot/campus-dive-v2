@@ -28,10 +28,13 @@ export default function CreatePostModal({ isOpen, onClose }) {
     const fetchGroups = async () => {
         try {
             const res = await socialApi.getGroups();
-            const joined = (res.data || []).filter(g => g.user_role);
-            setMyGroups(joined);
-            if (joined.length > 0 && !selectedGroup) {
-                setSelectedGroup(joined[0]);
+            const isAdmin = user?.role === 'admin' || user?.role === 'Admin';
+            const allGroups = res.data || [];
+            const visibleGroups = isAdmin ? allGroups : allGroups.filter(g => g.user_role);
+            
+            setMyGroups(visibleGroups);
+            if (visibleGroups.length > 0 && !selectedGroup) {
+                setSelectedGroup(visibleGroups[0]);
             }
         } catch (err) {
             console.error('Failed to fetch groups:', err);
