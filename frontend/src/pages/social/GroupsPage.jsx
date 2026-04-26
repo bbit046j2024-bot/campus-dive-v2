@@ -7,10 +7,16 @@ export default function GroupsPage() {
     const [groups, setGroups] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeTab, setActiveTab] = useState('discover');
 
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab === 'my') setActiveTab('my');
+        else setActiveTab('discover');
+        
         fetchGroups();
-    }, []);
+    }, [window.location.search]);
 
     const fetchGroups = async () => {
         setIsLoading(true);
@@ -53,55 +59,77 @@ export default function GroupsPage() {
                 </button>
             </div>
 
-            {/* My Groups */}
-            {myGroupsList.length > 0 && (
-                <section>
-                    <h3 className="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase mb-6 px-2">My Groups</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {myGroupsList.map(group => (
-                            <GroupCard key={group.id} group={group} onUpdate={fetchGroups} />
-                        ))}
+            {/* Tabs */}
+            <div className="flex items-center gap-6 border-b border-slate-100 dark:border-white/5 pb-1">
+                <button 
+                    onClick={() => setActiveTab('discover')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-3 transition-all ${activeTab === 'discover' ? 'text-primary-500 border-b-2 border-primary-500' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    Discover Communities
+                </button>
+                <button 
+                    onClick={() => setActiveTab('my')}
+                    className={`text-[10px] font-black uppercase tracking-widest pb-3 transition-all ${activeTab === 'my' ? 'text-primary-500 border-b-2 border-primary-500' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    My Groups ({myGroupsList.length})
+                </button>
+            </div>
+
+            {/* Content based on Active Tab */}
+            {activeTab === 'my' ? (
+                <section className="animate-in fade-in slide-in-from-left-4 duration-300">
+                    {myGroupsList.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {myGroupsList.map(group => (
+                                <GroupCard key={group.id} group={group} onUpdate={fetchGroups} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 card border-dashed border-2 bg-transparent border-slate-200 dark:border-slate-800">
+                            <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <UsersIcon className="w-8 h-8 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-black dark:text-white mb-2">No groups joined yet</h3>
+                            <p className="text-sm text-slate-500 max-w-xs mx-auto mb-6">Join some communities to start networking!</p>
+                            <button onClick={() => setActiveTab('discover')} className="btn-primary px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest">Browse Discover</button>
+                        </div>
+                    )}
+                </section>
+            ) : (
+                <section className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                        <h3 className="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase px-2">Discover New Communities</h3>
+                        <div className="flex items-center gap-2">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input 
+                                    type="text" 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search groups..." 
+                                    className="pl-9 pr-4 py-2 bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-slate-800 rounded-full text-xs font-medium dark:text-white focus:ring-1 focus:ring-primary-500 w-full sm:w-64 transition-all"
+                                />
+                            </div>
+                        </div>
                     </div>
+                    
+                    {discoveryList.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {discoveryList.map(group => (
+                                <GroupCard key={group.id} group={group} onUpdate={fetchGroups} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 card border-dashed border-2 bg-transparent border-slate-200 dark:border-slate-800">
+                            <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Compass className="w-8 h-8 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-black dark:text-white mb-2 underline underline-offset-8 decoration-primary-500/30">No new groups found</h3>
+                            <p className="text-sm text-slate-500 max-w-xs mx-auto">Try a different search term or check back later.</p>
+                        </div>
+                    )}
                 </section>
             )}
-
-            {/* Discover Groups */}
-            <section>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <h3 className="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase px-2">Discover Communities</h3>
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input 
-                                type="text" 
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search groups..." 
-                                className="pl-9 pr-4 py-2 bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-slate-800 rounded-full text-xs font-medium dark:text-white focus:ring-1 focus:ring-primary-500 w-full sm:w-64 transition-all"
-                            />
-                        </div>
-                        <button className="p-2 bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-slate-800 rounded-full text-slate-400 hover:text-primary-500 transition-colors">
-                            <Filter className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-                
-                {discoveryList.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {discoveryList.map(group => (
-                            <GroupCard key={group.id} group={group} onUpdate={fetchGroups} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 card border-dashed border-2 bg-transparent border-slate-200 dark:border-slate-800">
-                        <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Compass className="w-8 h-8 text-slate-400" />
-                        </div>
-                        <h3 className="text-lg font-black dark:text-white mb-2 underline underline-offset-8 decoration-primary-500/30">No new groups found</h3>
-                        <p className="text-sm text-slate-500 max-w-xs mx-auto">Try a different search term or check back later.</p>
-                    </div>
-                )}
-            </section>
         </div>
     );
 }
