@@ -285,4 +285,44 @@ class AdminController {
             Response::error('Diagnostic failure. Check logs for SMTP errors.', 500);
         }
     }
+
+    /** POST /api/admin/system/broadcast */
+    public static function broadcast(): void {
+        $user = AuthMiddleware::handle();
+        RoleMiddleware::require([ROLE_ADMIN, ROLE_MANAGER, ROLE_INTERVIEWER, 'Admin', 'Manager', 'Interviewer'], $user);
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $v = Validator::make($input)
+            ->required('subject')
+            ->required('message')
+            ->required('target'); // 'all', 'students', or array of user_ids
+
+        if ($v->fails()) Response::validationError($v->errors());
+
+        $db = Database::getInstance();
+        $emails = [];
+
+        if ($input['target'] === 'all') {
+            $stmt = $db->query("SELECT email FROM users WHERE status != 'rejected'");
+            $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } elseif ($input['target'] === 'students') {
+            $stmt = $db->prepare("SELECT email FROM users WHERE role_id = ? AND status != 'rejected'");
+            $stmt->execute([ROLE_STUDENT]);
+            $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } elseif (is_array($input['target'])) {
+            $placeholders = implode(',', array_fill(0, count($input['target']), '?'));
+            $stmt = $db->prepare("SELECT email FROM users WHERE id IN ($placeholders)");
+            $stmt->execute($input['target']);
+            $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
+        $count = 0;
+        foreach ($emails as $email) {
+            if (EmailService::sendNotification($email, $input['subject'], $input['message'])) {
+                $count++;
+            }
+        }
+
+        Response::success(['sent' => $count], "Broadcast initiated. {$count} transmissions successful.");
+    }
 }

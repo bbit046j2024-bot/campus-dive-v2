@@ -24,6 +24,7 @@ import SinglePostPage from './pages/social/SinglePostPage';
 import SocialProfilePage from './pages/social/SocialProfilePage';
 import GroupManagerDashboard from './pages/social/GroupManagerDashboard';
 import NotificationsPage from './pages/social/NotificationsPage';
+import BroadcastPage from './pages/admin/BroadcastPage';
 
 // Public Pages
 import HomePage from './pages/public/HomePage';
@@ -110,6 +111,11 @@ export default function App() {
         <Route path="/admin/social" element={
           <RouteGuard roles={['admin', 'Admin']}>
             <SocialGroupsAdminPage />
+          </RouteGuard>
+        } />
+        <Route path="/admin/broadcast" element={
+          <RouteGuard roles={['admin', 'Admin', 'manager', 'Manager', 'interviewer', 'Interviewer']}>
+            <BroadcastPage />
           </RouteGuard>
         } />
 
