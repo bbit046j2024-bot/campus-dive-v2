@@ -228,6 +228,21 @@ class AuthController {
         Response::success(null, 'Logged out successfully.');
     }
 
+    /** POST /api/auth/google - Initiation */
+    public static function googleLogin(): void {
+        // Root path detection for config
+        $rootPath = dirname(dirname(__DIR__));
+        $googleConfigPath = $rootPath . '/google_config.php';
+        if (!file_exists($googleConfigPath)) {
+            $googleConfigPath = dirname(__DIR__) . '/google_config.php';
+        }
+        
+        require_once $googleConfigPath;
+        
+        $url = getGoogleLoginUrl();
+        Response::success(['url' => $url], 'Google authentication initiated.');
+    }
+
     /** GET /api/auth/google-callback */
     public static function googleCallback(): void {
         // Standardize path - AuthController is in api/controllers/

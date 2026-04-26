@@ -117,8 +117,8 @@ function handleGoogleCallback($code) {
         if (class_exists('User')) {
             // Using API model
             $db = Database::getInstance();
-            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, department, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, 1)");
-            $stmt->execute([$firstname, $lastname, $email, $googleId, $department, $randomPassword, $role, $role_id, $avatar, $status]);
+            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, department, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
+            $stmt->execute([$firstname, $lastname, $email, $googleId, '', $department, $randomPassword, $role, $role_id, $avatar, $status]);
             $userId = $db->lastInsertId();
         } else {
             // Fallback to mysqli
