@@ -62,6 +62,10 @@ function handleGoogleCallback($code) {
     $lastname = $googleUser->getFamilyName();
     $googleId = $googleUser->getId();
 
+    // Safety fallback for names to prevent DB crashes
+    if (empty($firstname)) $firstname = explode('@', $email)[0];
+    if (empty($lastname)) $lastname = 'User';
+
     // Prefer API User model if available
     if (class_exists('User')) {
         $user = User::findByEmail($email);
@@ -108,17 +112,18 @@ function handleGoogleCallback($code) {
         $role_id = defined('ROLE_STUDENT') ? ROLE_STUDENT : 4;
         $status = 'pending';
         $randomPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+        $department = 'General';
 
         if (class_exists('User')) {
             // Using API model
             $db = Database::getInstance();
-            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?, 1)");
-            $stmt->execute([$firstname, $lastname, $email, $googleId, $randomPassword, $role, $role_id, $avatar, $status]);
+            $stmt = $db->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, department, password, role, role_id, avatar, status, email_verified) VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, 1)");
+            $stmt->execute([$firstname, $lastname, $email, $googleId, $department, $randomPassword, $role, $role_id, $avatar, $status]);
             $userId = $db->lastInsertId();
         } else {
             // Fallback to mysqli
-            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, password, role, avatar, status) VALUES (?, ?, ?, ?, '', ?, ?, ?, 'pending')");
-            $stmt->bind_param("ssssssss", $firstname, $lastname, $email, $googleId, $randomPassword, $role, $avatar);
+            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, email, google_id, phone, department, password, role, avatar, status) VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, 'pending')");
+            $stmt->bind_param("ssssssssss", $firstname, $lastname, $email, $googleId, $department, $randomPassword, $role, $avatar);
             $stmt->execute();
             $userId = $stmt->insert_id;
         }
