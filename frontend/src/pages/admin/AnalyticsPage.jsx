@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { useToast } from '../../context/ToastContext';
-import { BarChart3, TrendingUp, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { 
+    BarChart3, TrendingUp, Users, CheckCircle, 
+    XCircle, Clock, Mail, ShieldCheck, Zap 
+} from 'lucide-react';
 
 export default function AnalyticsPage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [testingEmail, setTestingEmail] = useState(false);
     const toast = useToast();
 
     useEffect(() => {
@@ -23,17 +27,29 @@ export default function AnalyticsPage() {
         }
     };
 
+    const handleTestEmail = async () => {
+        setTestingEmail(true);
+        try {
+            await api.post('/admin/system/test-email');
+            toast.success('Diagnostic email dispatched successfully!');
+        } catch (err) {
+            toast.error('Email Dispatch Failed. Check SMTP credentials.');
+        } finally {
+            setTestingEmail(false);
+        }
+    };
+
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
-            <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         </div>
     );
 
     const stats = [
-        { label: 'Total Students', value: data?.stats?.total_students || 0, icon: Users, color: 'text-primary-500', bg: 'bg-primary-50 dark:bg-primary-900/10' },
-        { label: 'Approved', value: data?.stats?.approved || 0, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/10' },
-        { label: 'Pending', value: data?.stats?.pending || 0, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/10' },
-        { label: 'Rejected', value: data?.stats?.rejected || 0, icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10' },
+        { label: 'Total Students', value: data?.stats?.total_students || 0, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/10' },
+        { label: 'Approved', value: data?.stats?.approved || 0, icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10' },
+        { label: 'Pending Sync', value: data?.stats?.pending || 0, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/10' },
+        { label: 'Decommissioned', value: data?.stats?.rejected || 0, icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/10' },
     ];
 
     return (
@@ -43,7 +59,7 @@ export default function AnalyticsPage() {
                     <h1 className="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 dark:text-white flex items-center gap-4">
                         Intelligence <span className="text-indigo-600 font-display">& Assets</span>
                     </h1>
-                    <p className="text-surface-500 dark:text-surface-400 mt-2 font-medium">Real-time performance metrics and predictive deployment trends</p>
+                    <p className="text-surface-500 dark:text-surface-400 mt-2 font-medium uppercase text-[10px] tracking-[0.2em] opacity-70">Strategic performance metrics and uplink diagnostics</p>
                 </div>
             </div>
 
@@ -62,13 +78,13 @@ export default function AnalyticsPage() {
                 ))}
             </div>
 
-            {/* Trends Chart (Simplified Visualization) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Engagement Chart */}
                 <div className="lg:col-span-2 card-premium p-8 lg:p-10 animate-stagger" style={{ animationDelay: '500ms' }}>
                     <div className="flex items-center justify-between mb-12">
                         <h3 className="font-display font-black text-xl text-surface-900 dark:text-white flex items-center gap-3">
                             <div className="w-2 h-6 bg-indigo-600 rounded-full" />
-                            Engagement Velocity
+                            Enrollment Velocity
                         </h3>
                         <span className="text-[10px] font-black px-4 py-2 rounded-full bg-indigo-600/10 text-indigo-600 tracking-widest uppercase">
                             H1 REPORTING CYCLE
@@ -99,50 +115,43 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-                <div className="card-premium p-8 lg:p-10 animate-stagger" style={{ animationDelay: '600ms' }}>
-                    <h3 className="font-display font-black text-xl mb-8 text-surface-900 dark:text-white">Quick Breakdown</h3>
-                    <div className="space-y-8">
-                        {data?.stats && Object.entries(data.stats).filter(([key]) => key !== 'total_students').map(([key, value], i) => {
-                            const percentage = (value / data.stats.total_students) * 100 || 0;
-                            const colors = {
-                                approved: 'bg-emerald-500 shadow-emerald-500/20',
-                                rejected: 'bg-rose-500 shadow-rose-500/20',
-                                default: 'bg-indigo-500 shadow-indigo-500/20'
-                            };
-                            const color = colors[key] || colors.default;
-
-                            return (
-                                <div key={i} className="space-y-3">
-                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-surface-500">
-                                        <span className="opacity-60">{key.replace('_', ' ')}</span>
-                                        <span className={key === 'approved' ? 'text-emerald-600' : key === 'rejected' ? 'text-rose-600' : 'text-indigo-600'}>
-                                            {Math.round(percentage)}%
-                                        </span>
-                                    </div>
-                                    <div className="h-2.5 w-full bg-surface-100 dark:bg-white/5 rounded-full overflow-hidden p-0.5">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-1000 ${color}`}
-                                            style={{ width: `${percentage}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
+                {/* System Diagnostics */}
+                <div className="space-y-8 animate-stagger" style={{ animationDelay: '600ms' }}>
+                    <div className="card-premium p-8 lg:p-10 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Mail className="w-32 h-32" />
+                        </div>
+                        <h3 className="font-display font-black text-xl mb-6 text-surface-900 dark:text-white flex items-center gap-3">
+                            <ShieldCheck className="w-6 h-6 text-indigo-600" />
+                            Email System
+                        </h3>
+                        <p className="text-[11px] font-bold text-surface-500 uppercase tracking-widest leading-relaxed mb-8">
+                            Verify your SMTP uplink to ensure all verification and protocol emails are active.
+                        </p>
+                        
+                        <button 
+                            onClick={handleTestEmail}
+                            disabled={testingEmail}
+                            className="w-full btn-v2-primary py-4 text-[10px] font-black tracking-[0.2em] uppercase flex items-center justify-center gap-3 shadow-glow-indigo"
+                        >
+                            {testingEmail ? (
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <><Zap className="w-4 h-4" /> SEND DIAGNOSTIC</>
+                            )}
+                        </button>
                     </div>
 
-                    <div className="mt-12 p-6 rounded-3xl bg-indigo-600 text-white shadow-lifted shadow-indigo-500/40 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                             <TrendingUp className="w-20 h-20" />
-                        </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Primary Deployment</p>
-                        <p className="text-xl font-display font-black mt-1">Mombasa Campus</p>
-                        <div className="mt-6 flex items-center gap-2 text-[10px] font-black bg-white/10 p-2.5 rounded-xl backdrop-blur-sm w-fit">
-                            <TrendingUp className="w-3 h-3 text-emerald-400" />
-                            <span className="uppercase tracking-widest">15% Monthly Growth</span>
-                        </div>
+                    <div className="card-premium p-8 lg:p-10 bg-indigo-600 text-white shadow-lifted shadow-indigo-500/40">
+                         <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2 flex items-center gap-2">
+                             <TrendingUp className="w-3 h-3" /> Growth Factor
+                         </p>
+                         <p className="text-4xl font-display font-black">15.4%</p>
+                         <p className="text-[10px] font-black uppercase tracking-widest mt-4 opacity-60">Strategic momentum detected in H1 cycle.</p>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+",Description:

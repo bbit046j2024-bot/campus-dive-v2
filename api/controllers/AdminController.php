@@ -273,4 +273,16 @@ class AdminController {
 
         Response::success(null, 'User role updated successfully.');
     }
+
+    /** POST /api/admin/system/test-email */
+    public static function testEmail(): void {
+        $user = AuthMiddleware::handle();
+        RoleMiddleware::require([ROLE_ADMIN, 'Admin'], $user);
+        
+        if (EmailService::sendTest($user['email'])) {
+            Response::success(null, 'Diagnostic email dispatched to ' . $user['email']);
+        } else {
+            Response::error('Diagnostic failure. Check logs for SMTP errors.', 500);
+        }
+    }
 }
