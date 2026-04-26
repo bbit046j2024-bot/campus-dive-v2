@@ -15,16 +15,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ============================================================
 
 -- Roles
-DROP TABLE IF EXISTS roles;
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT
 );
 
 -- Permissions
-DROP TABLE IF EXISTS permissions;
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(100) NOT NULL UNIQUE,
@@ -41,8 +39,7 @@ CREATE TABLE IF NOT EXISTS role_permissions (
 );
 
 -- Users (Students, Admins, Managers, Interviewers)
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(100) NOT NULL,
     lastname VARCHAR(100) NOT NULL,
@@ -69,8 +66,7 @@ CREATE TABLE users (
 );
 
 -- Documents
-DROP TABLE IF EXISTS documents;
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     document_name VARCHAR(100) DEFAULT NULL,
@@ -84,8 +80,7 @@ CREATE TABLE documents (
 );
 
 -- Messages
-DROP TABLE IF EXISTS messages;
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
@@ -100,8 +95,7 @@ CREATE TABLE messages (
 );
 
 -- Notifications
-DROP TABLE IF EXISTS notifications;
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -113,8 +107,7 @@ CREATE TABLE notifications (
 );
 
 -- Recruitment Letters
-DROP TABLE IF EXISTS recruitment_letters;
-CREATE TABLE recruitment_letters (
+CREATE TABLE IF NOT EXISTS recruitment_letters (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     letter_content TEXT NOT NULL,
@@ -129,8 +122,7 @@ CREATE TABLE recruitment_letters (
 -- ============================================================
 
 -- ANALYTICS & AUDIT
-DROP TABLE IF EXISTS analytics_logs;
-CREATE TABLE analytics_logs (
+CREATE TABLE IF NOT EXISTS analytics_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT DEFAULT NULL,
     action VARCHAR(100) NOT NULL,
@@ -139,8 +131,7 @@ CREATE TABLE analytics_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS application_stages;
-CREATE TABLE application_stages (
+CREATE TABLE IF NOT EXISTS application_stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     stage_name VARCHAR(50) NOT NULL,
@@ -164,8 +155,7 @@ CREATE TABLE IF NOT EXISTS marketing_templates (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS marketing_campaigns;
-CREATE TABLE marketing_campaigns (
+CREATE TABLE IF NOT EXISTS marketing_campaigns (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     template_id INT NOT NULL,
@@ -179,8 +169,7 @@ CREATE TABLE marketing_campaigns (
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
-DROP TABLE IF EXISTS marketing_queue;
-CREATE TABLE marketing_queue (
+CREATE TABLE IF NOT EXISTS marketing_queue (
     id INT AUTO_INCREMENT PRIMARY KEY,
     campaign_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -196,8 +185,7 @@ CREATE TABLE marketing_queue (
 );
 
 -- Marketing Logs
-DROP TABLE IF EXISTS marketing_logs;
-CREATE TABLE marketing_logs (
+CREATE TABLE IF NOT EXISTS marketing_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     queue_id INT NOT NULL,
     event_type ENUM('open', 'click') NOT NULL,

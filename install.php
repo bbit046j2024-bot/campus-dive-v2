@@ -27,6 +27,11 @@ try {
     foreach ($queries as $query) {
         if (empty($query)) continue;
         
+        // SAFETY: Skip any destructive commands during initialization
+        if (stripos($query, 'DROP TABLE') !== false || stripos($query, 'DELETE FROM') !== false || stripos($query, 'TRUNCATE') !== false) {
+            continue;
+        }
+
         // SKIP "CREATE DATABASE" and "USE" for Aiven/Railway compatibility
         if (stripos($query, 'CREATE DATABASE') !== false || stripos($query, 'USE ') === 0) {
             continue;
