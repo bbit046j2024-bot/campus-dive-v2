@@ -66,7 +66,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
 
-        {/* Public Auth Routes (Nested in PublicLayout too) */}
+        {/* Public Auth Routes */}
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to={isAdmin || isManager ? "/admin" : "/dashboard"} replace />} />
         <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to={isAdmin || isManager ? "/admin" : "/dashboard"} replace />} />
         <Route path="/forgot-password" element={!user ? <ForgotPasswordPage /> : <Navigate to={isAdmin || isManager ? "/admin" : "/dashboard"} replace />} />
@@ -138,7 +138,7 @@ export default function App() {
 
       </Route>
 
-      {/* Social Hub Routes (Standalone Layout) */}
+      {/* Social Hub Routes */}
       <Route path="/social" element={<SocialLayout />}>
         <Route index element={
           <RouteGuard roles={['user', 'Student', 'admin', 'Admin', 'manager', 'Manager']}>

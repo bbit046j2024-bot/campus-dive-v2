@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function BroadcastPage() {
-    const [target, setTarget] = useState('all'); // all, students, selected
+    const [target, setTarget] = useState('all');
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -46,7 +46,6 @@ export default function BroadcastPage() {
             const res = await api.post('/admin/system/broadcast', payload);
             toast.success(res.message || 'Broadcast successful!');
             
-            // Clear if successful
             setSubject('');
             setMessage('');
             setSelectedStudents([]);
@@ -85,6 +84,7 @@ export default function BroadcastPage() {
                     ].map(opt => (
                         <button
                             key={opt.id}
+                            type="button"
                             onClick={() => setTarget(opt.id)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                                 target === opt.id 
@@ -100,7 +100,6 @@ export default function BroadcastPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {/* Composer */}
                 <div className="lg:col-span-2 space-y-8">
                     <div className="card-premium p-8 lg:p-10">
                         <form onSubmit={handleSend} className="space-y-8">
@@ -136,6 +135,7 @@ export default function BroadcastPage() {
                                 </div>
                                 
                                 <button 
+                                    type="submit"
                                     disabled={loading || (target === 'selected' && selectedStudents.length === 0)}
                                     className="btn-v2-primary px-12 py-5 text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 shadow-glow-indigo disabled:opacity-50 disabled:shadow-none"
                                 >
@@ -150,7 +150,6 @@ export default function BroadcastPage() {
                     </div>
                 </div>
 
-                {/* Targeted List or Info */}
                 <div className="space-y-8">
                     {target === 'selected' ? (
                         <div className="card-premium h-[750px] flex flex-col p-0 overflow-hidden">
@@ -164,7 +163,6 @@ export default function BroadcastPage() {
                                     className="w-full bg-surface-100/50 dark:bg-white/5 border border-surface-200 dark:border-white/5 rounded-xl px-5 py-3 text-[11px] font-bold outline-none focus:border-indigo-600 transition-all"
                                 />
                             </div>
-                            
                             <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                                 {filteredStudents.map(s => (
                                     <div 
@@ -183,13 +181,6 @@ export default function BroadcastPage() {
                                         {selectedStudents.includes(s.id) && <CheckCircle2 className="w-4 h-4 shrink-0" />}
                                     </div>
                                 ))}
-                            </div>
-                            
-                            <div className="p-6 bg-surface-100/50 dark:bg-white/5 border-t border-surface-100 dark:border-white/5">
-                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-indigo-600">
-                                    <span>Selected</span>
-                                    <span>{selectedStudents.length} ASSETS</span>
-                                </div>
                             </div>
                         </div>
                     ) : (
@@ -211,14 +202,6 @@ export default function BroadcastPage() {
                                     </li>
                                 ))}
                             </ul>
-                            
-                            <div className="mt-12 p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 relative z-10">
-                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Network Status</p>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-glow-emerald" />
-                                    <span className="text-xs font-black uppercase tracking-widest">Uplink Nominal</span>
-                                </div>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -226,3 +209,4 @@ export default function BroadcastPage() {
         </div>
     );
 }
+",Description:
