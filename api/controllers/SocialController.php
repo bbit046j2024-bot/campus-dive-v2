@@ -84,4 +84,21 @@ class SocialController {
 
         Response::success($profile);
     }
+
+    /**
+     * Get public groups for registration/discovery (No Auth Required)
+     */
+    public static function getPublicGroups(): void {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT id, name, slug, description, category, avatar_url, 
+                   (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+            FROM social_groups g
+            WHERE g.is_private = 0 AND g.status = 'active'
+            ORDER BY member_count DESC
+            LIMIT 12
+        ");
+        $stmt->execute();
+        Response::success($stmt->fetchAll());
+    }
 }

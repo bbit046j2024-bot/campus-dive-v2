@@ -61,20 +61,29 @@ class AdminGroupController {
         $groupId = $db->lastInsertId();
 
         // Auto-join the creator as a manager if no manager was explicitly assigned
-        // OR if the manager assigned is NOT the creator, still ensure creator is a member/manager
         $finalManagerId = $managerId ?: $user['id'];
         
-        $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) 
-                      VALUES (?, ?, 'manager', 'active') 
-                      ON DUPLICATE KEY UPDATE role = 'manager', status = 'active'")
-           ->execute([$groupId, $finalManagerId]);
+        // SAFE JOIN HELPER: Handles databases with or without the 'status' column
+        $joinToGroup = function($gId, $uId, $role) use ($db) {
+            try {
+                $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) 
+                              VALUES (?, ?, ?, 'active') 
+                              ON DUPLICATE KEY UPDATE role = ?, status = 'active'")
+                   ->execute([$gId, $uId, $role, $role]);
+            } catch (Exception $e) {
+                // Fallback for older database schemas without 'status'
+                $db->prepare("INSERT INTO group_members (group_id, user_id, role) 
+                              VALUES (?, ?, ?) 
+                              ON DUPLICATE KEY UPDATE role = ?")
+                   ->execute([$gId, $uId, $role, $role]);
+            }
+        };
+
+        $joinToGroup($groupId, $finalManagerId, 'manager');
 
         // If a different manager was assigned, also make sure they are in the group
         if ($managerId && $managerId != $user['id']) {
-            $db->prepare("INSERT INTO group_members (group_id, user_id, role, status) 
-                          VALUES (?, ?, 'manager', 'active') 
-                          ON DUPLICATE KEY UPDATE role = 'manager', status = 'active'")
-               ->execute([$groupId, $managerId]);
+            $joinToGroup($groupId, $managerId, 'manager');
         }
 
         Response::success(['id' => $groupId, 'slug' => $slug], 'Group created successfully.');

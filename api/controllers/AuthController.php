@@ -116,9 +116,23 @@ class AuthController {
                 'Your account has been created. Please verify your email to get started.',
                 'success'
             );
-            error_log("REGISTER: Notification created");
-        } catch (\Exception $e) {
-            error_log('Notification failed: ' . $e->getMessage());
+        } catch (\Exception $e) {}
+
+        // AUTO-JOIN SELECTED GROUPS
+        if (!empty($input['selectedGroups']) && is_array($input['selectedGroups'])) {
+            $db = Database::getInstance();
+            foreach ($input['selectedGroups'] as $groupId) {
+                try {
+                    $db->prepare("INSERT INTO group_members (group_id, user_id, status) VALUES (?, ?, 'active')")
+                       ->execute([(int)$groupId, $userId]);
+                } catch (\Exception $e) {
+                    // Fallback for old schema
+                    try {
+                        $db->prepare("INSERT INTO group_members (group_id, user_id) VALUES (?, ?)")
+                           ->execute([(int)$groupId, $userId]);
+                    } catch (\Exception $ex) {}
+                }
+            }
         }
 
         Response::success(

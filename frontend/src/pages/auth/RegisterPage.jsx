@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -6,7 +6,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { 
     User, Mail, Lock, Eye, EyeOff, Phone, 
     CreditCard, ArrowRight, Moon, Sun, 
-    CheckCircle, XCircle, ChevronLeft, Building2 
+    CheckCircle, XCircle, ChevronLeft, Building2,
+    Users, Heart
 } from 'lucide-react';
 import api from '../../api/client';
 
@@ -16,7 +17,9 @@ export default function RegisterPage() {
         firstname: '', lastname: '', email: '', phone: '', 
         student_id: '', department: 'Computer Science',
         password: '', confirm_password: '',
+        selectedGroups: []
     });
+    const [publicGroups, setPublicGroups] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
@@ -25,7 +28,31 @@ export default function RegisterPage() {
     const toast = useToast();
     const { dark, toggle } = useTheme();
 
+    useEffect(() => {
+        if (step === 3) {
+            fetchPublicGroups();
+        }
+    }, [step]);
+
+    const fetchPublicGroups = async () => {
+        try {
+            const res = await api.get('/social/groups/public');
+            setPublicGroups(res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch public groups');
+        }
+    };
+
     const update = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+    const toggleGroup = (groupId) => {
+        setForm(f => ({
+            ...f,
+            selectedGroups: f.selectedGroups.includes(groupId)
+                ? f.selectedGroups.filter(id => id !== groupId)
+                : [...f.selectedGroups, groupId]
+        }));
+    };
 
     const getStrength = (pw) => {
         let s = 0;
@@ -112,8 +139,9 @@ export default function RegisterPage() {
                         </p>
 
                         <div className="flex items-center gap-4">
-                            <div className={`w-3 h-3 rounded-full transition-all duration-500 ${step === 1 ? 'bg-indigo-500 w-8' : 'bg-white/20'}`} />
-                            <div className={`w-3 h-3 rounded-full transition-all duration-500 ${step === 2 ? 'bg-indigo-500 w-8' : 'bg-white/20'}`} />
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className={`w-3 h-3 rounded-full transition-all duration-500 ${step === i ? 'bg-indigo-500 w-8' : 'bg-white/20'}`} />
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -125,7 +153,7 @@ export default function RegisterPage() {
                     <div className="flex items-center justify-between mb-12">
                         <div className="flex items-center gap-3">
                              <div className="w-2 h-8 bg-indigo-600 rounded-full" />
-                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-surface-400">Step {step} of 2</span>
+                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-surface-400">Step {step} of 3</span>
                         </div>
                         <button onClick={toggle} className="w-12 h-12 rounded-2xl flex items-center justify-center bg-surface-100 dark:bg-white/5 text-surface-600 dark:text-surface-400 hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
                             {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -134,10 +162,12 @@ export default function RegisterPage() {
 
                     <div className="mb-10">
                         <h2 className="text-4xl font-black mb-3 tracking-tight text-indigo-950 dark:text-white uppercase transition-all">
-                            {step === 1 ? 'Personal' : 'Academic'} <span className="text-indigo-600">Sync</span>
+                            {step === 1 ? 'Personal' : step === 2 ? 'Academic' : 'Social'} <span className="text-indigo-600">Sync</span>
                         </h2>
                         <p className="text-surface-500 font-bold uppercase tracking-widest text-[10px] opacity-60 leading-relaxed">
-                            {step === 1 ? 'Establish your digital identity within the network' : 'Secure your profile with campus credentials'}
+                            {step === 1 ? 'Establish your digital identity within the network' : 
+                             step === 2 ? 'Secure your profile with campus credentials' :
+                             'Discover and follow communities that match your interests'}
                         </p>
                     </div>
 
@@ -148,7 +178,7 @@ export default function RegisterPage() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {step === 1 ? (
+                        {step === 1 && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="group">
@@ -187,8 +217,10 @@ export default function RegisterPage() {
                                     NEXT PROTOCOL <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </div>
-                        ) : (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-left-8 duration-500">
+                        )}
+
+                        {step === 2 && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div className="group">
                                     <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Department / Faculty</label>
                                     <div className="relative">
@@ -234,6 +266,61 @@ export default function RegisterPage() {
 
                                 <div className="flex gap-4 mt-8">
                                     <button type="button" onClick={() => setStep(1)} className="p-4 rounded-2xl bg-surface-100 dark:bg-white/5 text-surface-500 hover:text-indigo-600 transition-all shadow-sm">
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <button type="button" onClick={() => setStep(3)} className="btn-v2-primary flex-1 py-5 text-xs font-black uppercase tracking-[0.2em] shadow-glow-indigo flex items-center justify-center gap-3">
+                                        CONTINUE TO HUBS <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
+                                <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                    {publicGroups.map(group => (
+                                        <div 
+                                            key={group.id}
+                                            onClick={() => toggleGroup(group.id)}
+                                            className={`
+                                                group relative p-4 rounded-3xl border transition-all cursor-pointer flex items-center gap-4
+                                                ${form.selectedGroups.includes(group.id) 
+                                                    ? 'bg-indigo-500/10 border-indigo-500 shadow-glow-indigo/10' 
+                                                    : 'bg-surface-100/50 dark:bg-white/5 border-surface-200 dark:border-white/5 hover:border-indigo-500/50'
+                                                }
+                                            `}
+                                        >
+                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black overflow-hidden flex-shrink-0 shadow-lg">
+                                                {group.avatar_url ? <img src={group.avatar_url} className="w-full h-full object-cover" /> : group.name[0]}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <h4 className="text-xs font-black dark:text-white uppercase tracking-tight truncate">{group.name}</h4>
+                                                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">{group.category}</span>
+                                                </div>
+                                                <p className="text-[10px] text-surface-500 font-bold truncate mt-0.5">{group.description}</p>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <Users className="w-3 h-3 text-surface-400" />
+                                                    <span className="text-[10px] font-black text-surface-400">{group.member_count} Members</span>
+                                                </div>
+                                            </div>
+                                            <div className={`
+                                                w-8 h-8 rounded-xl flex items-center justify-center transition-all
+                                                ${form.selectedGroups.includes(group.id) ? 'bg-indigo-500 text-white scale-110' : 'bg-surface-200 dark:bg-white/10 text-surface-400 group-hover:scale-110'}
+                                            `}>
+                                                <Heart className={`w-4 h-4 ${form.selectedGroups.includes(group.id) ? 'fill-current' : ''}`} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {publicGroups.length === 0 && (
+                                        <div className="text-center py-10 opacity-50">
+                                            <p className="text-[10px] font-black uppercase tracking-widest">No public hubs discovered yet.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-4 mt-8">
+                                    <button type="button" onClick={() => setStep(2)} className="p-4 rounded-2xl bg-surface-100 dark:bg-white/5 text-surface-500 hover:text-indigo-600 transition-all shadow-sm">
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
                                     <button type="submit" disabled={loading} className="btn-v2-primary flex-1 py-5 text-xs font-black uppercase tracking-[0.2em] shadow-glow-indigo flex items-center justify-center gap-3">
