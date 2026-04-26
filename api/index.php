@@ -9,8 +9,8 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/middleware/AuthMiddleware.php';
 require_once __DIR__ . '/middleware/RoleMiddleware.php';
 require_once __DIR__ . '/middleware/CsrfMiddleware.php';
-require_once __DIR__ . '/utils/Response.php';
-require_once __DIR__ . '/utils/Validator.php';
+require_once __DIR__ . '/helpers/Response.php';
+require_once __DIR__ . '/helpers/Validator.php';
 
 // Controllers
 require_once __DIR__ . '/controllers/AuthController.php';
