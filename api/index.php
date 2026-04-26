@@ -44,10 +44,25 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = str_replace(['/api', '/Campus-Dive/api', '/Campus-Dive-main/api'], '', $path);
 $path = '/' . trim($path, '/');
 
-// Security Headers
-header("Access-Control-Allow-Origin: *");
+// --- DYNAMIC CORS HANDSHAKE ---
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowed_origins = [
+    'https://campus-dive-v2.vercel.app',
+    'https://campus-dive-v2-production.up.railway.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    // Fallback for development or other authorized origins
+    header("Access-Control-Allow-Origin: https://campus-dive-v2.vercel.app");
+}
+
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
+header("Access-Control-Allow-Credentials: true");
 
 if ($method === 'OPTIONS') {
     exit(0);
