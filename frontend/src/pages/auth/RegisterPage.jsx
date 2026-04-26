@@ -206,7 +206,7 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div className="group">
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Phone Number</label>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Telecom Reference</label>
                                     <div className="relative">
                                         <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-300 group-focus-within:text-indigo-600 transition-colors" />
                                         <input type="tel" value={form.phone} onChange={update('phone')} className="w-full bg-surface-100/50 dark:bg-white/5 border border-surface-200 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none" placeholder="+254 XXX XXX XXX" required />
@@ -236,7 +236,7 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div className="group">
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Student ID Number</label>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Institutional ID Number</label>
                                     <div className="relative">
                                         <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-300 group-focus-within:text-indigo-600 transition-colors" />
                                         <input type="text" value={form.student_id} onChange={update('student_id')} className="w-full bg-surface-100/50 dark:bg-white/5 border border-surface-200 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none" placeholder="CS/001/2024" required />
