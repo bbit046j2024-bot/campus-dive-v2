@@ -368,4 +368,3 @@ export default function RegisterPage() {
         </div>
     );
 }
-",Description:
