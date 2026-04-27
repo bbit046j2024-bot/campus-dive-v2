@@ -260,6 +260,7 @@ class AuthController {
             Response::error('No code provided', 400);
         }
 
+        if (session_status() === PHP_SESSION_NONE) session_start();
         $result = handleGoogleCallback($code);
 
         if ($result['success']) {
