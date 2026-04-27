@@ -44,10 +44,26 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ];
 
-                // TiDB Cloud / Secure Cloud Support
-                if (strpos($host, 'tidbcloud.com') !== false || self::getEnv('MYSQL_SSL') === 'true') {
-                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false; // For compatibility
-                    // If you have a specific CA cert, you would add it here
+                // TiDB Cloud / Secure Cloud SSL Support
+                $needsSsl = strpos($host, 'tidbcloud.com') !== false 
+                         || strpos($host, 'aiven.io') !== false
+                         || self::getEnv('MYSQL_SSL') === 'true';
+                
+                if ($needsSsl) {
+                    // Use system CA certs on Linux (Railway/Docker)
+                    $caPaths = [
+                        '/etc/ssl/certs/ca-certificates.crt',  // Debian/Ubuntu
+                        '/etc/pki/tls/certs/ca-bundle.crt',    // RHEL/CentOS
+                        '/etc/ssl/ca-bundle.pem',               // OpenSUSE
+                    ];
+                    $caFile = null;
+                    foreach ($caPaths as $path) {
+                        if (file_exists($path)) { $caFile = $path; break; }
+                    }
+                    if ($caFile) {
+                        $options[PDO::MYSQL_ATTR_SSL_CA] = $caFile;
+                    }
+                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
                 }
 
                 self::$instance = new PDO($dsn, $user, $pass, $options);
