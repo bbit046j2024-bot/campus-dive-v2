@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Campus Dive V2 - Production Router
  * All API requests funnel through here.
@@ -74,6 +74,8 @@ $routes = [
     'POST /auth/register'       => ['AuthController', 'register'],
     'POST /auth/login'          => ['AuthController', 'login'],
     'POST /auth/google'         => ['AuthController', 'googleLogin'],
+    'GET  /auth/google-url'     => ['AuthController', 'googleLogin'],
+    'GET  /auth/google-callback'=> ['AuthController', 'googleCallback'],
     'GET  /auth/me'             => ['AuthController', 'me'],
     'POST /auth/forgot-password'=> ['AuthController', 'forgotPassword'],
     'POST /auth/reset-password' => ['AuthController', 'resetPassword'],
