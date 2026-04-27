@@ -2,11 +2,14 @@
     PHP_EXTENSIONS = "mysqli, pdo_mysql, mbstring, gd, curl, openssl"
 
 [phases.setup]
-    nixPkgs = ["...", "nodejs", "php"]
+    nixPkgs = ["...", "nodejs", "php", "composer"]
 
 [phases.install]
     dependsOn = ["setup"]
-    cmds = ["npm install --prefix frontend"]
+    cmds = [
+        "npm install --prefix frontend",
+        "composer install --no-dev --optimize-autoloader"
+    ]
 
 [phases.build]
     dependsOn = ["install"]
