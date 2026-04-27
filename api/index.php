@@ -81,11 +81,16 @@ $routes = [
     'POST /auth/reset-password' => ['AuthController', 'resetPassword'],
     'GET  /auth/verify-email'   => ['AuthController', 'verifyEmail'],
 
+    'POST /auth/logout'         => ['AuthController', 'logout'],
+
     // Student Dashboard
     'GET /student/dashboard'    => ['StudentController', 'dashboard'],
     'GET /student/documents'    => ['StudentController', 'getDocuments'],
     'POST /student/documents'   => ['StudentController', 'uploadDocument'],
     'POST /student/settings'    => ['StudentController', 'updateSettings'],
+    'PUT  /student/profile'     => ['StudentController', 'updateProfile'],
+    'PUT  /student/password'    => ['StudentController', 'changePassword'],
+    'POST /student/avatar'      => ['StudentController', 'uploadAvatar'],
 
     // Admin / Management
     'GET /admin/dashboard'      => ['AdminController', 'dashboard'],
@@ -123,6 +128,7 @@ $routes = [
     // Social (Shared)
     'GET /social/validate-url'  => ['SocialController', 'validateUrl'],
     'GET /social/profile'       => ['SocialController', 'getProfile'],
+    'GET /social/groups/public' => ['SocialController', 'getPublicGroups'],
 
     // Groups & Feed
     'GET /social/feed'          => ['GroupPostController', 'globalFeed'],
@@ -157,10 +163,15 @@ $routes = [
     'POST /social/manager/moderate-post' => ['GroupManagerController', 'moderatePost'],
     
     // Notifications & Messages (Direct)
-    'GET /notifications'         => ['NotificationController', 'index'],
-    'POST /notifications/clear'  => ['NotificationController', 'clearAll'],
-    'GET /messages'              => ['MessageController', 'index'],
-    'POST /messages'             => ['MessageController', 'store'],
+    'GET /notifications'              => ['NotificationController', 'index'],
+    'POST /notifications/clear'       => ['NotificationController', 'markAllRead'],
+    'GET /notifications/unread-count' => ['NotificationController', 'unreadCount'],
+    
+    'GET /messages'                   => ['MessageController', 'index'],
+    'POST /messages'                  => ['MessageController', 'send'],
+    'GET /messages/conversations'     => ['MessageController', 'conversations'],
+    'GET /messages/users'             => ['MessageController', 'getUsers'],
+    'GET /messages/unread-count'      => ['MessageController', 'unreadCount'],
 ];
 
 function handle_email_debug() {
