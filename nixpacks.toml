@@ -1,2 +1,17 @@
 [variables]
     PHP_EXTENSIONS = "mysqli, pdo_mysql, mbstring, gd, curl, openssl"
+
+[phases.setup]
+    nixPkgs = ["...", "nodejs", "php"]
+
+[phases.install]
+    dependsOn = ["setup"]
+    cmds = ["npm install --prefix frontend"]
+
+[phases.build]
+    dependsOn = ["install"]
+    cmds = [
+        "npm run build --prefix frontend",
+        "cp -r frontend/dist/* .",
+        "mv index.html app.html"
+    ]

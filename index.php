@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Campus Dive V2 - Production Entry Point
  * v2.1.0 - Stability Force Refresh
@@ -14,4 +14,10 @@ if (strpos($request, $api_prefix) === 0 || strpos($request, '/Campus-Dive/api') 
 }
 
 // Otherwise, serve the Frontend
-require_once __DIR__ . '/index.html';
+if (file_exists(__DIR__ . '/app.html')) {
+    require_once __DIR__ . '/app.html';
+} else {
+    // Fallback to source if build hasn't run locally
+    require_once __DIR__ . '/frontend/index.html';
+}
+
