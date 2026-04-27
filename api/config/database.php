@@ -38,11 +38,19 @@ class Database {
             $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $db);
 
             try {
-                self::$instance = new PDO($dsn, $user, $pass, [
+                $options = [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES   => false,
-                ]);
+                ];
+
+                // TiDB Cloud / Secure Cloud Support
+                if (strpos($host, 'tidbcloud.com') !== false || self::getEnv('MYSQL_SSL') === 'true') {
+                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false; // For compatibility
+                    // If you have a specific CA cert, you would add it here
+                }
+
+                self::$instance = new PDO($dsn, $user, $pass, $options);
             } catch (PDOException $e) {
                 // Use the constant if defined, otherwise check env
                 $debug = defined('APP_DEBUG') ? APP_DEBUG : (self::getEnv('APP_DEBUG') === 'true' || self::getEnv('APP_DEBUG') === '1');
