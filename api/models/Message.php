@@ -30,6 +30,8 @@ class Message {
     }
 
     public static function getThread(int $userId, int $otherUserId, int $limit = 50, int $offset = 0): array {
+        $limit = max(1, (int)$limit);
+        $offset = max(0, (int)$offset);
         $stmt = self::db()->prepare("
             SELECT m.*, 
                    s.firstname as sender_firstname, s.lastname as sender_lastname, s.avatar as sender_avatar,
@@ -39,9 +41,9 @@ class Message {
             JOIN users r ON r.id = m.receiver_id
             WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
             ORDER BY m.created_at ASC
-            LIMIT ? OFFSET ?
+            LIMIT {$limit} OFFSET {$offset}
         ");
-        $stmt->execute([$userId, $otherUserId, $otherUserId, $userId, $limit, $offset]);
+        $stmt->execute([$userId, $otherUserId, $otherUserId, $userId]);
         return $stmt->fetchAll();
     }
 

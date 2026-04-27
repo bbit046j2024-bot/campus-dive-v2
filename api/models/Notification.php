@@ -8,8 +8,9 @@ class Notification {
     }
 
     public static function getByUserId(int $userId, int $limit = 20): array {
-        $stmt = self::db()->prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?');
-        $stmt->execute([$userId, $limit]);
+        $limit = max(1, (int)$limit);
+        $stmt = self::db()->prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ' . $limit);
+        $stmt->execute([$userId]);
         return $stmt->fetchAll();
     }
 
