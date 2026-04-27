@@ -208,7 +208,7 @@ $paramRoutes = [
 
 // Route Matching
 foreach ($routes as $pattern => $handler) {
-    $parts = explode(' ', trim($pattern), 2);
+    $parts = preg_split('/\s+/', trim($pattern), 2);
     $patternMethod = $parts[0];
     $patternPath = isset($parts[1]) ? $parts[1] : '';
 
