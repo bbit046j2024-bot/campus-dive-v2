@@ -36,7 +36,7 @@ define('MAIL_HOST',          getenv('MAIL_HOST')          ?: 'smtp.gmail.com');
 define('MAIL_PORT',          (int)(getenv('MAIL_PORT')    ?: 465));
 define('MAIL_ENCRYPTION',    getenv('MAIL_ENCRYPTION')    ?: 'ssl');
 define('MAIL_USERNAME',      getenv('MAIL_USERNAME')      ?: ''); 
-define('MAIL_PASSWORD',      getenv('MAIL_PASSWORD')      ?: ''); 
+define('MAIL_PASSWORD',      getenv('MAIL_PASSWORD') ?: getenv('RESEND_API_KEY') ?: ''); 
 
 // Resend.com compatibility: 
 // If using Resend (password starts with re_), we must use a verified domain.

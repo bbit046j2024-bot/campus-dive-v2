@@ -26,8 +26,9 @@ class AuthController {
             Response::error('Invalid credentials.', 401);
         }
 
-        // Check email verification (skip for admin)
-        if (($user['role'] ?? '') !== 'admin' && isset($user['email_verified']) && !$user['email_verified']) {
+        // Check email verification (skip for admin/manager)
+        $isAdminOrManager = in_array($user['role'] ?? '', ['admin', 'manager']) || in_array($user['role_name'] ?? '', ['Admin', 'Manager']);
+        if (!$isAdminOrManager && isset($user['email_verified']) && !$user['email_verified']) {
             Response::error('Please verify your email before logging in.', 403);
         }
 
