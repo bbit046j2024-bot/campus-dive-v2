@@ -51,14 +51,22 @@ $allowed_origins = [
     'https://campus-dive-v2.vercel.app',
     'https://campus-dive-v2-production.up.railway.app',
     'http://localhost:5173',
-    'http://localhost:3000'
+    'http://localhost:5000',
+    'http://localhost:3000',
+    'http://0.0.0.0:5000',
 ];
 
-if (in_array($origin, $allowed_origins)) {
+// Allow any *.replit.dev or *.repl.co origin for local development
+$isReplitOrigin = preg_match('/^https?:\/\/[a-zA-Z0-9\-]+\.(replit\.dev|repl\.co|replit\.app)(:\d+)?$/', $origin);
+
+if (in_array($origin, $allowed_origins) || $isReplitOrigin) {
     header("Access-Control-Allow-Origin: $origin");
+} elseif (empty($origin)) {
+    // Same-origin request (PHP dev server), allow it
+    header("Access-Control-Allow-Origin: *");
 } else {
     // Fallback for development or other authorized origins
-    header("Access-Control-Allow-Origin: https://campus-dive-v2.vercel.app");
+    header("Access-Control-Allow-Origin: *");
 }
 
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");

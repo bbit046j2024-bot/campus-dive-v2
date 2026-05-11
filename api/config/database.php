@@ -26,16 +26,23 @@ class Database {
                 $user = $parts['user'] ?? 'root';
                 $pass = $parts['pass'] ?? '';
                 $db   = ltrim($parts['path'] ?? 'railway', '/');
+                $socket = null;
             } else {
-                // Priority 2: Individual Railway variables
-                $host = self::getEnv('MYSQLHOST', '127.0.0.1');
-                $port = self::getEnv('MYSQLPORT', '3306');
-                $user = self::getEnv('MYSQLUSER', 'root');
-                $pass = self::getEnv('MYSQLPASSWORD', '');
-                $db   = self::getEnv('MYSQLDATABASE', 'railway');
+                // Priority 2: Individual env variables
+                $host   = self::getEnv('MYSQLHOST', '127.0.0.1');
+                $port   = self::getEnv('MYSQLPORT', '3306');
+                $user   = self::getEnv('MYSQLUSER', 'root');
+                $pass   = self::getEnv('MYSQLPASSWORD', '');
+                $db     = self::getEnv('MYSQLDATABASE', 'campus_recruitment');
+                $socket = self::getEnv('MYSQL_SOCKET', '');
             }
 
-            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $db);
+            // Build DSN - prefer Unix socket if available (local dev on Replit)
+            if (!empty($socket) && file_exists($socket)) {
+                $dsn = sprintf('mysql:unix_socket=%s;dbname=%s;charset=utf8mb4', $socket, $db);
+            } else {
+                $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $db);
+            }
 
             try {
                 $options = [
@@ -50,11 +57,10 @@ class Database {
                          || self::getEnv('MYSQL_SSL') === 'true';
                 
                 if ($needsSsl) {
-                    // Use system CA certs on Linux (Railway/Docker)
                     $caPaths = [
-                        '/etc/ssl/certs/ca-certificates.crt',  // Debian/Ubuntu
-                        '/etc/pki/tls/certs/ca-bundle.crt',    // RHEL/CentOS
-                        '/etc/ssl/ca-bundle.pem',               // OpenSUSE
+                        '/etc/ssl/certs/ca-certificates.crt',
+                        '/etc/pki/tls/certs/ca-bundle.crt',
+                        '/etc/ssl/ca-bundle.pem',
                     ];
                     $caFile = null;
                     foreach ($caPaths as $path) {
@@ -68,11 +74,10 @@ class Database {
 
                 self::$instance = new PDO($dsn, $user, $pass, $options);
             } catch (PDOException $e) {
-                // Use the constant if defined, otherwise check env
                 $debug = defined('APP_DEBUG') ? APP_DEBUG : (self::getEnv('APP_DEBUG') === 'true' || self::getEnv('APP_DEBUG') === '1');
                 
                 if ($debug) {
-                    throw new RuntimeException('Database connection failed: ' . $e->getMessage() . " (Host: $host, Port: $port, DB: $db, User: $user)");
+                    throw new RuntimeException('Database connection failed: ' . $e->getMessage() . " (DSN: $dsn, User: $user)");
                 }
                 throw new RuntimeException('Database connection failed.');
             }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Email Service (PHPMailer wrapper)
  */
