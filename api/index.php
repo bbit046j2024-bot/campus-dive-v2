@@ -2,8 +2,21 @@
 /**
  * Campus Dive V2 - Production Router
  * All API requests funnel through here.
- * [Redeploy Trigger: v2.0.1]
+ * [Redeploy Trigger: v2.0.2]
  */
+
+// --- CROSS-DOMAIN SESSION COOKIES ---
+// Must be called before session_start() anywhere in the app.
+// SameSite=None + Secure is required when the backend (Railway) and
+// frontend (Vercel) are on different domains.
+session_set_cookie_params([
+    'lifetime' => 7200,
+    'path'     => '/',
+    'domain'   => '',
+    'secure'   => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
 
 require_once __DIR__ . '/config/app.php';
 require_once __DIR__ . '/config/database.php';
@@ -62,11 +75,14 @@ $isReplitOrigin = preg_match('/^https?:\/\/[a-zA-Z0-9\-]+\.(replit\.dev|repl\.co
 if (in_array($origin, $allowed_origins) || $isReplitOrigin) {
     header("Access-Control-Allow-Origin: $origin");
 } elseif (empty($origin)) {
-    // Same-origin request (PHP dev server), allow it
-    header("Access-Control-Allow-Origin: *");
+    // Same-origin request (no Origin header) — no CORS header needed
 } else {
-    // Fallback for development or other authorized origins
-    header("Access-Control-Allow-Origin: *");
+    // Unknown origin — reflect it back only in non-production to avoid
+    // leaking credentials to arbitrary third-party sites.
+    // In production, block silently by not emitting an Allow-Origin header.
+    if (getenv('APP_ENV') !== 'production') {
+        header("Access-Control-Allow-Origin: $origin");
+    }
 }
 
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
