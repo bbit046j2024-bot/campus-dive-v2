@@ -57,19 +57,29 @@ class Database {
                          || self::getEnv('MYSQL_SSL') === 'true';
                 
                 if ($needsSsl) {
+                    // Always disable server cert verification so connection works
+                    // even when no CA bundle is present on the Railway container
+                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+
+                    // Try to provide a CA file for better security (optional)
                     $caPaths = [
                         '/etc/ssl/certs/ca-certificates.crt',
                         '/etc/pki/tls/certs/ca-bundle.crt',
                         '/etc/ssl/ca-bundle.pem',
+                        '/etc/ssl/cert.pem',
                     ];
-                    $caFile = null;
                     foreach ($caPaths as $path) {
-                        if (file_exists($path)) { $caFile = $path; break; }
+                        if (file_exists($path)) {
+                            $options[PDO::MYSQL_ATTR_SSL_CA] = $path;
+                            break;
+                        }
                     }
-                    if ($caFile) {
-                        $options[PDO::MYSQL_ATTR_SSL_CA] = $caFile;
+
+                    // Append ssl_mode=REQUIRED to DSN so the driver enables SSL
+                    // even when no CA file was found above
+                    if (strpos($dsn, 'ssl_mode') === false) {
+                        $dsn .= ';ssl_mode=REQUIRED';
                     }
-                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
                 }
 
                 self::$instance = new PDO($dsn, $user, $pass, $options);
