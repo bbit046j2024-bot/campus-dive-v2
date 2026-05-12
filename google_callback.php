@@ -1,14 +1,25 @@
 <?php
-require_once 'config.php';
-require_once 'google_config.php';
+/**
+ * Google OAuth Callback Gateway
+ * Receives the OAuth code from Google and forwards it to the API handler.
+ * Does NOT need a database connection — just a redirect.
+ */
 
 if (isset($_GET['code'])) {
-    // Redirect to the API callback handler to centralize logic
-    $callback_url = '/api/auth/google-callback?code=' . urlencode($_GET['code']);
-    header("Location: " . $callback_url);
+    $code = urlencode($_GET['code']);
+    $state = isset($_GET['state']) ? '&state=' . urlencode($_GET['state']) : '';
+    header("Location: /api/auth/google-callback?code={$code}{$state}");
     exit;
-} else {
-    $_SESSION['alert'] = ['message' => 'Google login cancelled.', 'type' => 'error'];
-    redirect('index.php');
 }
-?>
+
+if (isset($_GET['error'])) {
+    $error = urlencode($_GET['error']);
+    $frontendUrl = getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app';
+    header("Location: {$frontendUrl}/login?error={$error}");
+    exit;
+}
+
+// No code and no error — something unexpected
+$frontendUrl = getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app';
+header("Location: {$frontendUrl}/login?error=oauth_cancelled");
+exit;

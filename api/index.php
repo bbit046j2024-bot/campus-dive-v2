@@ -129,7 +129,8 @@ $routes = [
     'POST /admin/system/test-email' => ['AdminController', 'testEmail'],
     'POST /admin/system/broadcast'  => ['AdminController', 'broadcast'],
 
-    // Debugging Uplinks
+    // Health & Diagnostics
+    'GET /health'               => 'handle_health_check',
     'GET /system/debug-email'   => 'handle_email_debug',
     'GET /system/debug-db'      => 'handle_db_debug',
     'GET /system/google-check'  => function() {
@@ -198,6 +199,60 @@ $routes = [
     'GET /messages/users'             => ['MessageController', 'getUsers'],
     'GET /messages/unread-count'      => ['MessageController', 'unreadCount'],
 ];
+
+function handle_health_check() {
+    $checks = [];
+
+    // 1. Database connectivity
+    try {
+        $db = Database::getInstance();
+        $db->query("SELECT 1");
+        $checks['database'] = ['status' => 'ok', 'driver' => 'PDO/MySQL (TiDB compatible)'];
+    } catch (Exception $e) {
+        $checks['database'] = ['status' => 'error', 'message' => $e->getMessage()];
+    }
+
+    // 2. Session cookie configuration
+    $cookieParams = session_get_cookie_params();
+    $checks['session_cookie'] = [
+        'samesite' => $cookieParams['samesite'] ?? 'not set',
+        'secure'   => $cookieParams['secure'] ? 'true' : 'false',
+        'httponly' => $cookieParams['httponly'] ? 'true' : 'false',
+        'status'   => ($cookieParams['samesite'] === 'None' && $cookieParams['secure']) ? 'ok' : 'warning: cross-domain cookies may fail',
+    ];
+
+    // 3. Google OAuth env vars
+    $googleId     = getenv('GOOGLE_CLIENT_ID');
+    $googleSecret = getenv('GOOGLE_CLIENT_SECRET');
+    $googleUri    = getenv('GOOGLE_REDIRECT_URI');
+    $checks['google_oauth'] = [
+        'GOOGLE_CLIENT_ID'     => $googleId     ? ('set (' . substr($googleId, 0, 8) . '...)') : 'MISSING',
+        'GOOGLE_CLIENT_SECRET' => $googleSecret ? 'set'  : 'MISSING',
+        'GOOGLE_REDIRECT_URI'  => $googleUri    ?: 'MISSING (will be auto-detected)',
+    ];
+
+    // 4. App env vars
+    $checks['app'] = [
+        'APP_URL'      => getenv('APP_URL')      ?: APP_URL,
+        'FRONTEND_URL' => getenv('FRONTEND_URL') ?: 'not set',
+        'APP_ENV'      => getenv('APP_ENV')      ?: 'not set',
+        'APP_DEBUG'    => defined('APP_DEBUG') && APP_DEBUG ? 'true' : 'false',
+    ];
+
+    // 5. CORS origin (current request)
+    $checks['cors'] = [
+        'request_origin' => $_SERVER['HTTP_ORIGIN'] ?? '(no Origin header)',
+    ];
+
+    $allOk = $checks['database']['status'] === 'ok'
+          && $checks['session_cookie']['status'] === 'ok'
+          && $googleId && $googleSecret;
+
+    http_response_code($allOk ? 200 : 500);
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => $allOk, 'checks' => $checks], JSON_PRETTY_PRINT);
+    exit;
+}
 
 function handle_email_debug() {
     $output = "--- Campus Dive Email Config Check ---\n";

@@ -18,3 +18,6 @@
         "cp -r frontend/dist/* .",
         "mv index.html app.html"
     ]
+
+[start]
+    cmd = "php -S 0.0.0.0:${PORT:-8080} index.php"
