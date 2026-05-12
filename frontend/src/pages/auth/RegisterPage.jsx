@@ -171,9 +171,16 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    {errors.general && (
-                        <div className="mb-8 p-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-600 flex items-center gap-3 animate-shake">
-                            <XCircle className="w-4 h-4" /> {errors.general}
+                    {(errors.general || Object.keys(errors).length > 0) && (
+                        <div className="mb-8 p-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-600 flex items-start gap-3 animate-shake">
+                            <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <div className="space-y-1">
+                                {errors.general && <p>{errors.general}</p>}
+                                {Object.entries(errors)
+                                    .filter(([k]) => k !== 'general')
+                                    .map(([k, v]) => <p key={k}>{v}</p>)
+                                }
+                            </div>
                         </div>
                     )}
 
@@ -264,11 +271,37 @@ export default function RegisterPage() {
                                     )}
                                 </div>
 
+                                <div className="group">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-surface-400 mb-2.5 ml-1">Confirm Password</label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-300 group-focus-within:text-indigo-600 transition-colors" />
+                                        <input type={showPassword ? 'text' : 'password'} value={form.confirm_password} onChange={update('confirm_password')} className={`w-full bg-surface-100/50 dark:bg-white/5 border rounded-2xl pl-12 pr-6 py-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none ${form.confirm_password && form.confirm_password !== form.password ? 'border-rose-500' : 'border-surface-200 dark:border-white/5'}`} placeholder="••••••••••••" required />
+                                    </div>
+                                    {form.confirm_password && form.confirm_password !== form.password && (
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-rose-500 mt-2 ml-1">Passwords do not match</p>
+                                    )}
+                                </div>
+
                                 <div className="flex gap-4 mt-8">
                                     <button type="button" onClick={() => setStep(1)} className="p-4 rounded-2xl bg-surface-100 dark:bg-white/5 text-surface-500 hover:text-indigo-600 transition-all shadow-sm">
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
-                                    <button type="button" onClick={() => setStep(3)} className="btn-v2-primary flex-1 py-5 text-xs font-black uppercase tracking-[0.2em] shadow-glow-indigo flex items-center justify-center gap-3">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            if (!form.password) {
+                                                setErrors({ general: 'Please enter a password.' });
+                                                return;
+                                            }
+                                            if (form.password !== form.confirm_password) {
+                                                setErrors({ general: 'Passwords do not match.' });
+                                                return;
+                                            }
+                                            setErrors({});
+                                            setStep(3);
+                                        }} 
+                                        className="btn-v2-primary flex-1 py-5 text-xs font-black uppercase tracking-[0.2em] shadow-glow-indigo flex items-center justify-center gap-3"
+                                    >
                                         CONTINUE TO HUBS <ArrowRight className="w-4 h-4" />
                                     </button>
                                 </div>
