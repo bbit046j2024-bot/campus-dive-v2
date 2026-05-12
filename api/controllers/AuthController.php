@@ -287,17 +287,32 @@ class AuthController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $result = handleGoogleCallback($code);
 
+        // Determine correct frontend URL dynamically
+        // Priority: FRONTEND_URL env > Replit dev domain > HTTP_HOST
+        $frontend_url = getenv('FRONTEND_URL');
+        if (empty($frontend_url)) {
+            $replitDomain = getenv('REPLIT_DEV_DOMAIN');
+            if (!empty($replitDomain)) {
+                $frontend_url = 'https://' . $replitDomain;
+            } else {
+                $proto = (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : 'http');
+                $host  = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $frontend_url = $proto . '://' . $host;
+            }
+        }
+        $frontend_url = rtrim($frontend_url, '/');
+
         if ($result['success']) {
-            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
+            // Set session before redirect
+            if (session_status() === PHP_SESSION_NONE) session_start();
             $params = isset($result['new_user']) ? '?welcome=true' : '';
-            header("Location: " . rtrim($frontend_url, '/') . "/dashboard" . $params);
+            // Determine dashboard path based on user role
+            $role = $result['user']['role'] ?? 'user';
+            $dashPath = in_array($role, ['admin', 'manager']) ? '/admin' : '/dashboard';
+            header("Location: " . $frontend_url . $dashPath . $params);
             exit;
         } else {
-            // Redirect back to login with error
-            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-            $frontend_url = str_ends_with($origin, '.vercel.app') ? $origin : (getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app');
-            header("Location: " . rtrim($frontend_url, '/') . "/login?error=" . urlencode($result['error']));
+            header("Location: " . $frontend_url . "/login?error=" . urlencode($result['error'] ?? 'oauth_failed'));
             exit;
         }
     }
