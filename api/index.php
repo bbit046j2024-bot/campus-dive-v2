@@ -256,12 +256,9 @@ function handle_health_check() {
 }
 
 function handle_email_debug() {
-    $output = "--- Campus Dive Email Config Check ---\n";
-    $output .= "MAIL_HOST: " . MAIL_HOST . "\n";
-    $output .= "MAIL_PORT: " . MAIL_PORT . "\n";
-    $output .= "MAIL_USERNAME: " . MAIL_USERNAME . "\n";
-    header('Content-Type: text/plain');
-    echo $output; exit;
+    $diag = EmailService::getDiagnostics();
+    Response::success($diag, 'Email configuration diagnostics');
+    exit;
 }
 
 function handle_db_debug() {
