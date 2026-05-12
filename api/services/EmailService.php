@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Service (PHPMailer wrapper)
+ * Email Service — Resend API (primary) with PHPMailer SMTP fallback
  */
 if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
     if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
@@ -15,9 +15,6 @@ use PHPMailer\PHPMailer\Exception;
 
 class EmailService {
 
-    /**
-     * Get the base template for all emails
-     */
     private static function getBaseTemplate(string $title, string $content, string $buttonText = '', string $buttonLink = ''): string {
         $buttonHtml = $buttonText && $buttonLink ? "
             <div style='margin: 40px 0;'>
@@ -65,87 +62,177 @@ class EmailService {
         ";
     }
 
+    /**
+     * Resolve the API key — checks RESEND_API_KEY first, then MAIL_PASSWORD.
+     */
+    private static function resolveApiKey(): string {
+        // Prefer RESEND_API_KEY env var directly
+        $key = getenv('RESEND_API_KEY');
+        if (!empty($key)) return $key;
+
+        // Fallback to MAIL_PASSWORD constant / env var
+        if (defined('MAIL_PASSWORD') && !empty(MAIL_PASSWORD)) return MAIL_PASSWORD;
+        $key = getenv('MAIL_PASSWORD');
+        if (!empty($key)) return $key;
+
+        return '';
+    }
+
+    /**
+     * Resolve the from address.
+     * IMPORTANT: onboarding@resend.dev can only deliver to the Resend account-owner email.
+     * For sending to any recipient you MUST set MAIL_FROM_ADDRESS to an address on a
+     * verified domain in your Resend dashboard (e.g. noreply@yourdomain.com).
+     */
+    private static function resolveFrom(): array {
+        $fromAddress = getenv('MAIL_FROM_ADDRESS');
+        if (empty($fromAddress) && defined('MAIL_FROM_ADDRESS')) $fromAddress = MAIL_FROM_ADDRESS;
+        if (empty($fromAddress)) $fromAddress = '';
+
+        $fromName = getenv('MAIL_FROM_NAME');
+        if (empty($fromName) && defined('MAIL_FROM_NAME')) $fromName = MAIL_FROM_NAME;
+        if (empty($fromName)) $fromName = 'Campus Dive';
+
+        $apiKey = self::resolveApiKey();
+
+        // If using Resend and from address is a personal email provider, switch to shared test domain.
+        // WARNING: onboarding@resend.dev only delivers to the Resend account owner's email.
+        // To send to ANY recipient, add a verified domain in Resend dashboard and set
+        // MAIL_FROM_ADDRESS=noreply@yourdomain.com on Railway.
+        if (str_starts_with($apiKey, 're_')) {
+            $isPersonalEmail = (
+                str_contains($fromAddress, 'gmail.com') ||
+                str_contains($fromAddress, 'outlook.com') ||
+                str_contains($fromAddress, 'yahoo.com') ||
+                str_contains($fromAddress, 'hotmail.com') ||
+                empty($fromAddress)
+            );
+            if ($isPersonalEmail) {
+                error_log('[EmailService] WARNING: MAIL_FROM_ADDRESS is a personal email or not set. '
+                    . 'Falling back to onboarding@resend.dev which can ONLY deliver to your Resend account email. '
+                    . 'Set MAIL_FROM_ADDRESS=noreply@yourdomain.com (verified in Resend) to send to any recipient.');
+                $fromAddress = 'onboarding@resend.dev';
+            }
+        }
+
+        return [$fromAddress, $fromName];
+    }
+
     public static function send(string $to, string $subject, string $htmlBody): bool {
-        $apiKey = defined('MAIL_PASSWORD') ? MAIL_PASSWORD : (getenv('MAIL_PASSWORD') ?: '');
-        $fromAddress = defined('MAIL_FROM_ADDRESS') ? MAIL_FROM_ADDRESS : (getenv('MAIL_FROM_ADDRESS') ?: 'noreply@campusdive.com');
-        $fromName = defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : (getenv('MAIL_FROM_NAME') ?: 'Campus Dive');
+        $apiKey = self::resolveApiKey();
+        [$fromAddress, $fromName] = self::resolveFrom();
 
         if (empty($apiKey)) {
-             self::logError("Email Configuration Missing", ['to' => $to, 'msg' => 'MAIL_PASSWORD not set in .env']);
-             return false;
+            error_log('[EmailService] ERROR: No email API key found. Set RESEND_API_KEY on Railway.');
+            return false;
         }
 
         if (str_starts_with($apiKey, 're_')) {
-            $apiUrl = 'https://api.resend.com/emails';
-            $data = [
-                'from'    => $fromName . ' <' . $fromAddress . '>',
-                'to'      => [$to],
-                'subject' => $subject,
-                'html'    => $htmlBody,
-            ];
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $apiUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $apiKey,
-                'Content-Type: application/json'
-            ]);
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            if ($httpCode >= 200 && $httpCode < 300) return true;
-            self::logError("Resend API Failed", ['to' => $to, 'http_code' => $httpCode]);
-        } else {
-            $mail = new PHPMailer(true);
-            try {
-                $mail->isSMTP();
-                $mail->Host       = defined('MAIL_HOST') ? MAIL_HOST : getenv('MAIL_HOST');
-                $mail->SMTPAuth   = true;
-                $mail->Username   = defined('MAIL_USERNAME') ? MAIL_USERNAME : getenv('MAIL_USERNAME');
-                $mail->Password   = $apiKey;
-                $port             = defined('MAIL_PORT') ? MAIL_PORT : getenv('MAIL_PORT');
-                $mail->SMTPSecure = ($port == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = $port;
-                $mail->setFrom($fromAddress, $fromName);
-                $mail->addAddress($to);
-                $mail->isHTML(true);
-                $mail->Subject = $subject;
-                $mail->Body    = $htmlBody;
-                $mail->AltBody = strip_tags($htmlBody);
-                $mail->send();
-                return true;
-            } catch (Exception $e) {
-                self::logError("PHPMailer SMTP Failed", ['to' => $to, 'error' => $mail->ErrorInfo]);
-            }
+            return self::sendViaResend($apiKey, $fromAddress, $fromName, $to, $subject, $htmlBody);
         }
+
+        return self::sendViaSMTP($apiKey, $fromAddress, $fromName, $to, $subject, $htmlBody);
+    }
+
+    private static function sendViaResend(string $apiKey, string $from, string $fromName, string $to, string $subject, string $html): bool {
+        $payload = [
+            'from'    => "{$fromName} <{$from}>",
+            'to'      => [$to],
+            'subject' => $subject,
+            'html'    => $html,
+        ];
+
+        $ch = curl_init('https://api.resend.com/emails');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode($payload),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT        => 15,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError) {
+            error_log('[EmailService] Resend cURL error: ' . $curlError);
+            return false;
+        }
+
+        $decoded = json_decode($response, true);
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+            error_log('[EmailService] Resend OK — id=' . ($decoded['id'] ?? 'n/a') . ' to=' . $to . ' from=' . $from);
+            return true;
+        }
+
+        // Log the full Resend error response so it's visible in Railway logs
+        $resendMessage = $decoded['message'] ?? $decoded['error'] ?? $response;
+        error_log('[EmailService] Resend FAILED — HTTP ' . $httpCode
+            . ' | from=' . $from
+            . ' | to=' . $to
+            . ' | error=' . $resendMessage
+            . ' | hint: if using onboarding@resend.dev, it only delivers to the Resend account email.'
+            . ' Set MAIL_FROM_ADDRESS=noreply@yourdomain.com after verifying your domain in Resend.');
         return false;
     }
 
-    public static function sendVerification(string $to, string $firstname, string $token): bool {
-        $baseUrl = rtrim(getenv('APP_URL') ?: 'http://localhost/Campus-Dive/Campus-Dive-main', '/');
-        if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'railway.app')) {
-            $baseUrl = 'https://' . $_SERVER['HTTP_HOST'];
+    private static function sendViaSMTP(string $apiKey, string $from, string $fromName, string $to, string $subject, string $html): bool {
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host       = defined('MAIL_HOST') ? MAIL_HOST : (getenv('MAIL_HOST') ?: 'smtp.gmail.com');
+            $mail->SMTPAuth   = true;
+            $mail->Username   = defined('MAIL_USERNAME') ? MAIL_USERNAME : getenv('MAIL_USERNAME');
+            $mail->Password   = $apiKey;
+            $port             = defined('MAIL_PORT') ? MAIL_PORT : (int)(getenv('MAIL_PORT') ?: 465);
+            $mail->SMTPSecure = ($port == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = $port;
+            $mail->setFrom($from, $fromName);
+            $mail->addAddress($to);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $html;
+            $mail->AltBody = strip_tags($html);
+            $mail->send();
+            error_log('[EmailService] SMTP OK — to=' . $to);
+            return true;
+        } catch (Exception $e) {
+            error_log('[EmailService] SMTP FAILED — to=' . $to . ' | error=' . $mail->ErrorInfo);
+            return false;
         }
-        $link = $baseUrl . '/api/auth/verify-email?token=' . $token;
-        $content = "<p>Welcome to the mainframe, <strong>{$firstname}</strong>.</p><p>Establish your clearance level by synchronizing your email address with our security protocols.</p>";
-        $html = self::getBaseTemplate('Security Sync Required', $content, 'ESTABLISH CLEARANCE', $link);
-        return self::send($to, 'Security Sync: Verify Your Identity', $html);
+    }
+
+    public static function sendVerification(string $to, string $firstname, string $token): bool {
+        // Verification link must always point to the backend API
+        $backendUrl = rtrim(getenv('APP_URL') ?: ('https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
+        $link = $backendUrl . '/api/auth/verify-email?token=' . $token;
+        $content = "<p>Welcome to the mainframe, <strong>{$firstname}</strong>.</p>"
+                 . "<p>Establish your clearance level by verifying your email address.</p>"
+                 . "<p style='font-size:12px;color:#94a3b8;'>If the button doesn't work, copy this link: {$link}</p>";
+        $html = self::getBaseTemplate('Verify Your Email', $content, 'VERIFY EMAIL', $link);
+        return self::send($to, 'Campus Dive: Verify Your Email', $html);
     }
 
     public static function sendPasswordReset(string $to, string $firstname, string $token): bool {
         $frontendUrl = rtrim(getenv('FRONTEND_URL') ?: 'https://campus-dive-v2.vercel.app', '/');
         $link = $frontendUrl . '/#/reset-password?token=' . $token;
-        $content = "<p>A password reset protocol was initiated for your profile. If you did not authorize this, please contact security immediately.</p>";
-        $html = self::getBaseTemplate('Protocol: Password Reset', $content, 'REINITIALIZE ACCESS', $link);
-        return self::send($to, 'Protocol Sync: Reset Password', $html);
+        $content = "<p>A password reset was requested for your account, <strong>{$firstname}</strong>.</p>"
+                 . "<p>If you did not request this, ignore this email — your password won't change.</p>"
+                 . "<p style='font-size:12px;color:#94a3b8;'>Link: {$link}</p>";
+        $html = self::getBaseTemplate('Password Reset', $content, 'RESET PASSWORD', $link);
+        return self::send($to, 'Campus Dive: Reset Your Password', $html);
     }
 
     public static function sendTest(string $to): bool {
-        $content = "<p>System diagnostics complete. Your SMTP uplink is operational. High-speed communication protocols are now fully active.</p>";
-        $html = self::getBaseTemplate('Diagnostic: Uplink Active', $content, 'ACCESS DASHBOARD', getenv('FRONTEND_URL'));
-        return self::send($to, 'System Diagnostic: SMTP Uplink Success', $html);
+        $content = "<p>Your email integration is working correctly. Emails will be delivered to your users.</p>";
+        $html = self::getBaseTemplate('Email Test Successful', $content, 'GO TO DASHBOARD', getenv('FRONTEND_URL') ?: '#');
+        return self::send($to, 'Campus Dive: Email Test', $html);
     }
 
     public static function sendNotification(string $to, string $subject, string $message): bool {
@@ -153,7 +240,32 @@ class EmailService {
         return self::send($to, $subject, $html);
     }
 
-    private static function logError(string $context, array $details): void {
-        error_log("$context: " . json_encode($details));
+    /**
+     * Returns diagnostic info about current email configuration (for the debug endpoint).
+     */
+    public static function getDiagnostics(): array {
+        $apiKey = self::resolveApiKey();
+        [$fromAddress, $fromName] = self::resolveFrom();
+        $isResend = str_starts_with($apiKey, 're_');
+
+        $warning = null;
+        if ($isResend && $fromAddress === 'onboarding@resend.dev') {
+            $warning = 'Using onboarding@resend.dev — emails can ONLY be delivered to your Resend account email. '
+                . 'To send to any recipient, verify a domain in Resend and set MAIL_FROM_ADDRESS=noreply@yourdomain.com on Railway.';
+        }
+
+        return [
+            'driver'           => $isResend ? 'Resend API' : 'SMTP (PHPMailer)',
+            'api_key_set'      => !empty($apiKey),
+            'api_key_prefix'   => $apiKey ? substr($apiKey, 0, 8) . '...' : 'NOT SET',
+            'from_address'     => $fromAddress ?: 'NOT SET',
+            'from_name'        => $fromName,
+            'warning'          => $warning,
+            'RESEND_API_KEY'   => getenv('RESEND_API_KEY') ? 'set' : 'not set',
+            'MAIL_PASSWORD'    => getenv('MAIL_PASSWORD') ? 'set' : 'not set',
+            'MAIL_FROM_ADDRESS'=> getenv('MAIL_FROM_ADDRESS') ?: 'not set (using fallback)',
+            'APP_URL'          => getenv('APP_URL') ?: 'not set',
+            'FRONTEND_URL'     => getenv('FRONTEND_URL') ?: 'not set',
+        ];
     }
 }
