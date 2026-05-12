@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
     Calendar, MapPin, Link as LinkIcon, 
     MessageSquare, Users, Edit3, Grid, List, Plus,
@@ -13,6 +13,7 @@ import { socialApi } from '../../api/social';
 export default function SocialProfilePage() {
     const { id } = useParams();
     const { user: authUser } = useAuth();
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [viewMode, setViewMode] = useState('grid');
@@ -85,7 +86,9 @@ export default function SocialProfilePage() {
                             </div>
                             <div className="flex items-center gap-2 justify-center">
                                 {isOwnProfile ? (
-                                    <button className="px-6 py-2.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-primary-500 transition-all flex items-center gap-2">
+                                    <button 
+                                        onClick={() => navigate('/settings')}
+                                        className="px-6 py-2.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-primary-500 hover:border-primary-500/30 transition-all flex items-center gap-2">
                                         <Edit3 className="w-4 h-4" />
                                         Edit Profile
                                     </button>
