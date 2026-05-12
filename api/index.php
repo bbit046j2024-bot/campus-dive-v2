@@ -5,17 +5,18 @@
  * [Redeploy Trigger: v2.0.2]
  */
 
-// --- CROSS-DOMAIN SESSION COOKIES ---
-// Must be called before session_start() anywhere in the app.
-// SameSite=None + Secure is required when the backend (Railway) and
-// frontend (Vercel) are on different domains.
+// --- SESSION COOKIES ---
+// Auto-detect environment: use SameSite=None + Secure only in production
+// (cross-domain Railway/Vercel setup). On Replit dev, use Lax + no Secure.
+$_isReplitDev = !empty(getenv('REPL_ID')) || !empty(getenv('REPLIT_DEV_DOMAIN'));
+$_isProduction = (getenv('APP_ENV') === 'production') && !$_isReplitDev;
 session_set_cookie_params([
     'lifetime' => 7200,
     'path'     => '/',
     'domain'   => '',
-    'secure'   => true,
+    'secure'   => $_isProduction,
     'httponly' => true,
-    'samesite' => 'None',
+    'samesite' => $_isProduction ? 'None' : 'Lax',
 ]);
 
 require_once __DIR__ . '/config/app.php';
