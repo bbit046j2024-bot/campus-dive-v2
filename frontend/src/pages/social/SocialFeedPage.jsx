@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { UserAvatar } from '../../components/ui/StatusBadge';
-import { Image as ImageIcon, Video, FileText, Smile, Loader2, Users } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Users } from 'lucide-react';
 import PostCard from '../../components/social/PostCard';
 import { socialApi } from '../../api/social';
 import MediaUrlInput from '../../components/social/MediaUrlInput';
@@ -145,12 +145,6 @@ export default function SocialFeedPage() {
                                         >
                                             <ImageIcon className="w-5 h-5" />
                                         </button>
-                                        <button className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-colors opacity-50 cursor-not-allowed">
-                                            <Video className="w-5 h-5" />
-                                        </button>
-                                        <button className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-xl transition-colors opacity-50 cursor-not-allowed">
-                                            <FileText className="w-5 h-5" />
-                                        </button>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <button 
@@ -182,14 +176,6 @@ export default function SocialFeedPage() {
                         <button onClick={() => { setIsExpanded(true); setShowMediaInput(true); }} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-500 transition-colors">
                             <ImageIcon className="w-4 h-4 text-primary-500" />
                             <span>Photo</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-colors opacity-50">
-                            <Video className="w-4 h-4 text-emerald-500" />
-                            <span>Video</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-colors opacity-50">
-                            <FileText className="w-4 h-4 text-amber-500" />
-                            <span>Event</span>
                         </button>
                     </div>
                 )}
