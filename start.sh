@@ -1,9 +1,12 @@
 #!/bin/bash
 set -e
 
-MYSQLD=/nix/store/s2lbn1axpc79kwnc829k5idkwabfq459-mysql-8.0.42/bin/mysqld
-MYSQL=/nix/store/s2lbn1axpc79kwnc829k5idkwabfq459-mysql-8.0.42/bin/mysql
+MYSQLD=$(which mysqld)
+MYSQL=$(which mysql)
 MYSQL_DIR=/home/runner/workspace/.mysql
+
+echo "[start.sh] Using mysqld: $MYSQLD"
+echo "[start.sh] Using mysql:  $MYSQL"
 
 # ── 1. Initialize MySQL data directory if needed ──────────────────────────────
 if [ ! -d "$MYSQL_DIR/data/mysql" ]; then
