@@ -20,7 +20,15 @@ define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI') ?: $defaultRedirect)
 // Download from: https://github.com/googleapis/google-api-php-client
 // Or install via Composer: composer require google/apiclient:^2.0
 
-require_once __DIR__ . '/vendor/autoload.php';
+// Resolve vendor autoload path — api/vendor takes priority (Railway),
+// then root/vendor (local dev), then fail with a clear message.
+if (file_exists(__DIR__ . '/api/vendor/autoload.php')) {
+    require_once __DIR__ . '/api/vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} else {
+    throw new RuntimeException('Google OAuth: vendor/autoload.php not found. Run "composer install" inside the api/ directory.');
+}
 
 use Google\Client;
 use Google\Service\Oauth2;
