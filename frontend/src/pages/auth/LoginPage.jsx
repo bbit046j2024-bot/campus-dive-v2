@@ -190,9 +190,13 @@ export default function LoginPage() {
                             onClick={async () => {
                                 try {
                                     const res = await api.get('/auth/google-url');
-                                    if (res.data?.url) window.location.href = res.data.url;
+                                    if (res.data?.url) {
+                                        window.location.href = res.data.url;
+                                    } else {
+                                        toast.error('Google Sign-In returned no URL. Check server configuration.');
+                                    }
                                 } catch (err) {
-                                    toast.error('Google ID Failure');
+                                    toast.error(err.message || 'Google Sign-In failed. Please try again.');
                                 }
                             }}
                             className="w-full py-4 px-6 rounded-2xl bg-white dark:bg-white/5 border border-surface-200 dark:border-indigo-500/30 hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-500/10 transition-all flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-surface-700 dark:text-surface-200 shadow-sm"

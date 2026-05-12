@@ -231,17 +231,40 @@ class AuthController {
 
     /** POST /api/auth/google - Initiation */
     public static function googleLogin(): void {
+        // Check env vars before doing anything else
+        $clientId     = getenv('GOOGLE_CLIENT_ID');
+        $clientSecret = getenv('GOOGLE_CLIENT_SECRET');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            Response::error('Google OAuth is not configured on this server. GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing.', 503);
+        }
+
         // Root path detection for config
         $rootPath = dirname(dirname(__DIR__));
         $googleConfigPath = $rootPath . '/google_config.php';
         if (!file_exists($googleConfigPath)) {
             $googleConfigPath = dirname(__DIR__) . '/google_config.php';
         }
-        
-        require_once $googleConfigPath;
-        
-        $url = getGoogleLoginUrl();
-        Response::success(['url' => $url], 'Google authentication initiated.');
+
+        if (!file_exists($googleConfigPath)) {
+            Response::error('google_config.php not found on the server.', 500);
+        }
+
+        try {
+            require_once $googleConfigPath;
+            $url = getGoogleLoginUrl();
+
+            if (empty($url)) {
+                Response::error('Google returned an empty login URL. Check GOOGLE_CLIENT_ID and GOOGLE_REDIRECT_URI.', 500);
+            }
+
+            Response::success(['url' => $url], 'Google authentication initiated.');
+        } catch (\Throwable $e) {
+            $msg = defined('APP_DEBUG') && APP_DEBUG
+                ? 'Google login error: ' . $e->getMessage()
+                : 'Google Sign-In is temporarily unavailable. Please try again or use email/password.';
+            Response::error($msg, 500);
+        }
     }
 
     /** GET /api/auth/google-callback */
