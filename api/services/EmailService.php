@@ -304,18 +304,31 @@ class EmailService {
                 . 'To send to any recipient, verify a domain in Resend and set MAIL_FROM_ADDRESS=noreply@yourdomain.com on Railway.';
         }
 
+        $smtpHost = getenv('SMTP_HOST') ?: getenv('MAIL_HOST') ?: (defined('MAIL_HOST') ? MAIL_HOST : '');
+        $smtpUser = getenv('SMTP_USERNAME') ?: getenv('MAIL_USERNAME') ?: (defined('MAIL_USERNAME') ? MAIL_USERNAME : '');
+        $smtpPass = getenv('SMTP_PASSWORD') ?: getenv('MAIL_SMTP_PASSWORD') ?: '';
+        $smtpPort = getenv('SMTP_PORT') ?: getenv('MAIL_PORT') ?: (defined('MAIL_PORT') ? MAIL_PORT : '');
+
         return [
-            'driver'           => $isResend ? 'Resend API' : 'SMTP (PHPMailer)',
-            'api_key_set'      => !empty($apiKey),
-            'api_key_prefix'   => $apiKey ? substr($apiKey, 0, 8) . '...' : 'NOT SET',
-            'from_address'     => $fromAddress ?: 'NOT SET',
-            'from_name'        => $fromName,
-            'warning'          => $warning,
-            'RESEND_API_KEY'   => getenv('RESEND_API_KEY') ? 'set' : 'not set',
-            'MAIL_PASSWORD'    => getenv('MAIL_PASSWORD') ? 'set' : 'not set',
-            'MAIL_FROM_ADDRESS'=> getenv('MAIL_FROM_ADDRESS') ?: 'not set (using fallback)',
-            'APP_URL'          => getenv('APP_URL') ?: 'not set',
-            'FRONTEND_URL'     => getenv('FRONTEND_URL') ?: 'not set',
+            'driver'              => $isResend ? 'Resend API' : 'SMTP (PHPMailer)',
+            'api_key_set'         => !empty($apiKey),
+            'api_key_prefix'      => $apiKey ? substr($apiKey, 0, 8) . '...' : 'NOT SET',
+            'from_address'        => $fromAddress ?: 'NOT SET',
+            'from_name'           => $fromName,
+            'warning'             => $warning,
+            'RESEND_API_KEY'      => getenv('RESEND_API_KEY') ? 'set' : 'not set',
+            'MAIL_PASSWORD'       => getenv('MAIL_PASSWORD') ? 'set' : 'not set',
+            'MAIL_FROM_ADDRESS'   => getenv('MAIL_FROM_ADDRESS') ?: 'not set (using fallback)',
+            'APP_URL'             => getenv('APP_URL') ?: 'not set',
+            'FRONTEND_URL'        => getenv('FRONTEND_URL') ?: 'not set',
+            'smtp_fallback'       => [
+                'configured'      => self::smtpConfigured(),
+                'SMTP_HOST'       => $smtpHost ?: 'NOT SET',
+                'SMTP_USERNAME'   => $smtpUser ?: 'NOT SET',
+                'SMTP_PASSWORD'   => $smtpPass ? 'set' : 'NOT SET',
+                'SMTP_PORT'       => $smtpPort ?: '465 (default)',
+                'SMTP_FROM'       => getenv('SMTP_FROM_ADDRESS') ?: 'not set (uses SMTP_USERNAME)',
+            ],
         ];
     }
 }
