@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import api from '../../api/client';
@@ -8,7 +9,8 @@ import { User, Lock, Camera, Bell, Trash2, Save } from 'lucide-react';
 export default function SettingsPage() {
     const { user, updateUser } = useAuth();
     const toast = useToast();
-    const [activeTab, setActiveTab] = useState('profile');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.tab || 'profile');
     const [loading, setLoading] = useState(false);
 
     const [profile, setProfile] = useState({
