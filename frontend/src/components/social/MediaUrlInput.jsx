@@ -53,7 +53,7 @@ export default function MediaUrlInput({ onSelect, onClear, initialValue = '' }) 
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     onBlur={() => validateUrl(url)}
-                    placeholder="Paste image or video URL (YouTube, Imgur, etc.)"
+                    placeholder="Paste any image or video URL (YouTube, OneDrive, Drive, Imgur, Dropbox…)"
                     className={`block w-full pl-10 pr-10 py-2 bg-slate-50 dark:bg-white/5 border ${error ? 'border-red-500' : 'border-slate-200 dark:border-slate-800'} rounded-xl text-sm dark:text-white placeholder:text-slate-500 focus:ring-primary-500 focus:border-primary-500 transition-all`}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
