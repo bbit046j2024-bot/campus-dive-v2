@@ -4,7 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { UserAvatar } from '../ui/StatusBadge';
 import {
     LayoutDashboard, Users, MessageSquare, FileText, Settings,
-    LogOut, Shield, BarChart3, Moon, Sun, Menu, X, ChevronDown, Users2, Megaphone
+    LogOut, Shield, BarChart3, Moon, Sun, Menu, X, ChevronDown, Users2, Megaphone, KeyRound
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -131,13 +131,22 @@ export default function Sidebar() {
                         )}
                     </div>
                     {!collapsed && (
-                        <button
-                            onClick={handleLogout}
-                            className="w-full mt-6 flex items-center justify-center gap-3 py-3 rounded-xl text-[9px] font-black text-rose-600 dark:text-rose-400 bg-rose-500/5 hover:bg-rose-600 hover:text-white transition-all uppercase tracking-widest border border-rose-600/10"
-                        >
-                            <LogOut className="w-3.5 h-3.5" />
-                            LOGOUT PROTOCOL
-                        </button>
+                        <div className="mt-4 space-y-2">
+                            <button
+                                onClick={() => { navigate('/settings', { state: { tab: 'security' } }); setMobileOpen(false); }}
+                                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-[9px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 hover:bg-indigo-600 hover:text-white transition-all uppercase tracking-widest border border-indigo-600/10"
+                            >
+                                <KeyRound className="w-3.5 h-3.5" />
+                                CHANGE PASSWORD
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-[9px] font-black text-rose-600 dark:text-rose-400 bg-rose-500/5 hover:bg-rose-600 hover:text-white transition-all uppercase tracking-widest border border-rose-600/10"
+                            >
+                                <LogOut className="w-3.5 h-3.5" />
+                                LOGOUT PROTOCOL
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
