@@ -118,19 +118,61 @@ class EmailService {
         return [$fromAddress, $fromName];
     }
 
+    /**
+     * Resolve SMTP credentials for fallback sending.
+     * Returns null if SMTP is not configured.
+     */
+    private static function smtpConfigured(): bool {
+        $host = getenv('SMTP_HOST') ?: getenv('MAIL_HOST') ?: (defined('MAIL_HOST') ? MAIL_HOST : '');
+        $user = getenv('SMTP_USERNAME') ?: getenv('MAIL_USERNAME') ?: (defined('MAIL_USERNAME') ? MAIL_USERNAME : '');
+        $pass = getenv('SMTP_PASSWORD') ?: getenv('MAIL_SMTP_PASSWORD') ?: '';
+        return !empty($host) && !empty($user) && !empty($pass);
+    }
+
+    private static function getSMTPCredentials(): array {
+        return [
+            'host' => getenv('SMTP_HOST') ?: getenv('MAIL_HOST') ?: (defined('MAIL_HOST') ? MAIL_HOST : 'smtp.gmail.com'),
+            'user' => getenv('SMTP_USERNAME') ?: getenv('MAIL_USERNAME') ?: (defined('MAIL_USERNAME') ? MAIL_USERNAME : ''),
+            'pass' => getenv('SMTP_PASSWORD') ?: getenv('MAIL_SMTP_PASSWORD') ?: '',
+            'port' => (int)(getenv('SMTP_PORT') ?: getenv('MAIL_PORT') ?: (defined('MAIL_PORT') ? MAIL_PORT : 465)),
+        ];
+    }
+
     public static function send(string $to, string $subject, string $htmlBody): bool {
         $apiKey = self::resolveApiKey();
         [$fromAddress, $fromName] = self::resolveFrom();
 
         if (empty($apiKey)) {
-            error_log('[EmailService] ERROR: No email API key found. Set RESEND_API_KEY on Railway.');
+            error_log('[EmailService] ERROR: No email API key/password found. Set RESEND_API_KEY or MAIL_PASSWORD on Railway.');
+            // Still try SMTP fallback if configured
+            if (self::smtpConfigured()) {
+                error_log('[EmailService] Attempting SMTP fallback (no Resend key set).');
+                $smtp = self::getSMTPCredentials();
+                return self::sendViaSMTP($smtp['pass'], $fromAddress, $fromName, $to, $subject, $htmlBody, $smtp);
+            }
             return false;
         }
 
+        // Primary: Resend API
         if (str_starts_with($apiKey, 're_')) {
-            return self::sendViaResend($apiKey, $fromAddress, $fromName, $to, $subject, $htmlBody);
+            $sent = self::sendViaResend($apiKey, $fromAddress, $fromName, $to, $subject, $htmlBody);
+            if ($sent) return true;
+
+            // Resend failed — try SMTP fallback
+            if (self::smtpConfigured()) {
+                error_log('[EmailService] Resend failed. Attempting SMTP fallback.');
+                $smtp = self::getSMTPCredentials();
+                // Use SMTP from address (can be different from Resend's verified domain)
+                $smtpFrom = getenv('SMTP_FROM_ADDRESS') ?: $smtp['user'];
+                return self::sendViaSMTP($smtp['pass'], $smtpFrom, $fromName, $to, $subject, $htmlBody, $smtp);
+            }
+
+            error_log('[EmailService] Resend failed and no SMTP fallback is configured. '
+                . 'Set SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD on Railway to enable fallback.');
+            return false;
         }
 
+        // Primary: SMTP (no Resend key)
         return self::sendViaSMTP($apiKey, $fromAddress, $fromName, $to, $subject, $htmlBody);
     }
 
@@ -182,15 +224,23 @@ class EmailService {
         return false;
     }
 
-    private static function sendViaSMTP(string $apiKey, string $from, string $fromName, string $to, string $subject, string $html): bool {
+    /**
+     * @param array|null $creds  Optional override: ['host','user','pass','port']
+     *                           When null, falls back to MAIL_* constants / env vars.
+     */
+    private static function sendViaSMTP(string $password, string $from, string $fromName, string $to, string $subject, string $html, ?array $creds = null): bool {
+        $host = $creds['host'] ?? (defined('MAIL_HOST') ? MAIL_HOST : (getenv('MAIL_HOST') ?: 'smtp.gmail.com'));
+        $user = $creds['user'] ?? (defined('MAIL_USERNAME') ? MAIL_USERNAME : (getenv('MAIL_USERNAME') ?: ''));
+        $pass = $creds['pass'] ?? $password;
+        $port = (int)($creds['port'] ?? (defined('MAIL_PORT') ? MAIL_PORT : (int)(getenv('MAIL_PORT') ?: 465)));
+
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = defined('MAIL_HOST') ? MAIL_HOST : (getenv('MAIL_HOST') ?: 'smtp.gmail.com');
+            $mail->Host       = $host;
             $mail->SMTPAuth   = true;
-            $mail->Username   = defined('MAIL_USERNAME') ? MAIL_USERNAME : getenv('MAIL_USERNAME');
-            $mail->Password   = $apiKey;
-            $port             = defined('MAIL_PORT') ? MAIL_PORT : (int)(getenv('MAIL_PORT') ?: 465);
+            $mail->Username   = $user;
+            $mail->Password   = $pass;
             $mail->SMTPSecure = ($port == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = $port;
             $mail->setFrom($from, $fromName);
@@ -200,10 +250,10 @@ class EmailService {
             $mail->Body    = $html;
             $mail->AltBody = strip_tags($html);
             $mail->send();
-            error_log('[EmailService] SMTP OK — to=' . $to);
+            error_log('[EmailService] SMTP OK — host=' . $host . ' to=' . $to);
             return true;
         } catch (Exception $e) {
-            error_log('[EmailService] SMTP FAILED — to=' . $to . ' | error=' . $mail->ErrorInfo);
+            error_log('[EmailService] SMTP FAILED — host=' . $host . ' to=' . $to . ' | error=' . $mail->ErrorInfo);
             return false;
         }
     }
