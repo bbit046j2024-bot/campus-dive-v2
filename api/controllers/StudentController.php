@@ -39,7 +39,7 @@ class StudentController {
     }
 
     /** GET /api/student/documents */
-    public static function documents(): void {
+    public static function getDocuments(): void {
         $user = AuthMiddleware::handle();
         $documents = Document::getByUserId($user['id']);
         Response::success($documents);
