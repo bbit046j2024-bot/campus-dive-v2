@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { UserAvatar } from '../../components/ui/StatusBadge';
 import { Image as ImageIcon, Loader2, Users } from 'lucide-react';
 import PostCard from '../../components/social/PostCard';
@@ -9,6 +10,7 @@ import MediaUrlInput from '../../components/social/MediaUrlInput';
 
 export default function SocialFeedPage() {
     const { user } = useAuth();
+    const toast = useToast();
     const [isExpanded, setIsExpanded] = useState(false);
     const [posts, setPosts] = useState([]);
     const [myGroups, setMyGroups] = useState([]);
@@ -76,7 +78,7 @@ export default function SocialFeedPage() {
             setIsExpanded(false);
             fetchData(); // Refresh feed
         } catch (err) {
-            alert(err.message || 'Failed to create post');
+            toast.error(err.message || 'Failed to create post');
         } finally {
             setIsSubmitting(false);
         }
