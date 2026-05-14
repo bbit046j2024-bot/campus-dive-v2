@@ -160,8 +160,8 @@ export default function LoginPage() {
                         </div>
 
                         <div className="flex items-center justify-between pt-2">
-                             <Link to="/forgot-password" weights="black" className="text-[10px] font-black uppercase tracking-widest text-surface-400 hover:text-indigo-600 transition-colors">
-                                Recovery Protocol?
+                            <Link to="/forgot-password" className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline underline-offset-4">
+                                Forgot Password?
                             </Link>
                         </div>
 
